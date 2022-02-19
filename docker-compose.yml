@@ -87,3 +87,13 @@ services:
         entrypoint: ["php", "artisan"]
         networks:
             - app
+
+    npm:
+        image: node:17.5.0
+        container_name: npm
+        volumes:
+            - ./src:/var/www/html
+        working_dir: /var/www/html
+        entrypoint: ["npm"]
+        networks:
+            - app
