@@ -25,6 +25,16 @@ services:
             MYSQL_ROOT_PASSWORD: secret
         networks:
             - app
+        ports:
+            - 4306:3306
+        volumes:
+            - ./mysql/data:/var/lib/mysql
+            - ./mysql/log:/var/log/mysql
+        # Fix mbind error
+        # This is could be a initial fix for now, this might disable the mysql security features
+        # https://thegeekbin.com/mbind-operation-not-permitted-docker-mysql/
+        security_opt:
+            - seccomp:unconfined
     
     nginx: 
         build:
