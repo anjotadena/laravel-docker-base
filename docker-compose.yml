@@ -37,7 +37,7 @@ services:
         security_opt:
             - seccomp:unconfined
     
-    nginx: 
+    nginx:
         build:
             context: .
             dockerfile: nginx.dockerfile 
@@ -67,6 +67,7 @@ services:
     #         - ./src:/var/www/html
 
     composer:
+        user: 1000:1000
         image: composer:latest
         container_name: composer
         volumes:
