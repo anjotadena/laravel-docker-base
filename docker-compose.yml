@@ -11,7 +11,7 @@ services:
             dockerfile: php.dockerfile
         container_name: php
         volumes:
-            - ./src:/var/www/html
+            - ./src:/var/www/html:delegated
         networks:
             - app
     
@@ -51,7 +51,7 @@ services:
             - 80:80
             - 443:443
         volumes:
-            - ./src:/var/www/html
+            - ./src:/var/www/html:delegated
     
     # apache:
     #     build:
