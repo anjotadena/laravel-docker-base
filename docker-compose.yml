@@ -22,28 +22,28 @@ services:
         networks:
             - app
     
-    # nginx: 
-    #     build:
-    #         context: .
-    #         dockerfile: nginx.dockerfile 
-    #     container_name: nginx
-    #     networks:
-    #         - app
-    #     ports:
-    #         - 80:80
-    #         - 443:443
-    #     volumes:
-    #         - ./src:/var/www/html
-
-    apache:
+    nginx: 
         build:
             context: .
-            dockerfile: apache.dockerfile
-        container_name: apache
+            dockerfile: nginx.dockerfile 
+        container_name: nginx
         networks:
             - app
         ports:
             - 80:80
-            - 443:443            
+            - 443:443
         volumes:
             - ./src:/var/www/html
+    
+    # apache:
+    #     build:
+    #         context: .
+    #         dockerfile: apache.dockerfile
+    #     container_name: apache
+    #     networks:
+    #         - app
+    #     ports:
+    #         - 80:80
+    #         - 443:443            
+    #     volumes:
+    #         - ./src:/var/www/html
