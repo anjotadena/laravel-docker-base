@@ -30,6 +30,7 @@ services:
         volumes:
             - ./mysql/data:/var/lib/mysql
             - ./mysql/log:/var/log/mysql
+            - ./mysql/my.cnf:/etc/mysql/my.cnf
         # Fix mbind error
         # This is could be a initial fix for now, this might disable the mysql security features
         # https://thegeekbin.com/mbind-operation-not-permitted-docker-mysql/
