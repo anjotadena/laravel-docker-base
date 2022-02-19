@@ -75,3 +75,15 @@ services:
         working_dir: /var/www/html
         networks:
             - app
+
+    artisan:
+        build:
+            context: .
+            dockerfile: php.dockerfile
+        container_name: artisan
+        volumes:
+            - ./src:/var/www/html
+        working_dir: /var/www/html
+        entrypoint: ["php", "artisan"]
+        networks:
+            - app
