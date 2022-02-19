@@ -42,6 +42,9 @@ services:
             context: .
             dockerfile: nginx.dockerfile 
         container_name: nginx
+        depends_on:
+            - php
+            - mysql
         networks:
             - app
         ports:
@@ -62,3 +65,12 @@ services:
     #         - 443:443            
     #     volumes:
     #         - ./src:/var/www/html
+
+    composer:
+        image: composer:latest
+        container_name: composer
+        volumes:
+            - ./src:/var/www/html
+        working_dir: /var/www/html
+        networks:
+            - app
