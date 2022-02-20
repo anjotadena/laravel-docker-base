@@ -12,6 +12,8 @@ services:
         container_name: php
         volumes:
             - ./src:/var/www/html:delegated
+        depends_on:
+            - mysql
         networks:
             - app
     
@@ -105,6 +107,8 @@ services:
             context: .
             dockerfile: php.dockerfile
         container_name: phpunit
+        depends_on:
+            - mysql
         volumes:
             - ./src:/var/www/html
         working_dir: /var/www/html
