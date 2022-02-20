@@ -123,3 +123,16 @@ services:
             - 6379:6379
         networks:
             - app
+
+    scheduler:
+        user: 1000:1000
+        build:
+            context: .
+            dockerfile: php.dockerfile
+        container_name: scheduler
+        volumes:
+            - ./src:/var/www/html
+        working_dir: /var/www/html
+        entrypoint: ["php", "artisan", "schedule:work"]
+        networks:
+            - app
