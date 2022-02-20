@@ -47,6 +47,7 @@ services:
         depends_on:
             - php
             - mysql
+            - redis
         networks:
             - app
         ports:
@@ -102,7 +103,6 @@ services:
             - app
 
     phpunit:
-        user: 1000:1000
         build:
             context: .
             dockerfile: php.dockerfile
@@ -113,5 +113,13 @@ services:
             - ./src:/var/www/html
         working_dir: /var/www/html
         entrypoint: ["/var/www/html/vendor/bin/phpunit"]
+        networks:
+            - app
+
+    redis:
+        image: redis:latest
+        container_name: redis
+        ports:
+            - 6379:6379
         networks:
             - app
