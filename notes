@@ -1,0 +1,59 @@
+Digital ocean specific
+
+$ ssh root@IP_ADDRESS
+
+$ sudo apt-get update
+$ sudo apt-get install get
+
+# Create non root user with sudo priveleges
+$ adduser docker
+$ usermod -aG sudo docker
+
+$ sudo apt install apt-transport-https ca-certificates curl software-properties-common -y
+$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+$ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+$ sudo apt update
+$ sudo apt upgrade -y
+$ apt-cache policy docker-ce
+$ sudo apt install docker-ce
+
+# Allow user
+sudo usermod -aG docker ${USER}
+sudo usermod -aG docker docker
+- logout then login as docker
+su docker
+sudo systemctl status docker
+id -nG
+sudo curl -L "https://github.com/docker/compose/releases/1.27.4/docker-compomse-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/dockekr-compose
+
+cd ~
+mkdir sites
+cd sites
+mkdir laravel-base.git
+git init --bare
+cd hooks
+nano post-recieve # 
+`
+#!/bin/sh
+git --work-tree=/home/docker/site --git-dir=/home/docker/repo/site.git checkout -f master
+cd /home/docker/site && docker-compose -f docker-compose.prod.yml up -d --build
+`
+chmod +x post-recieve
+
+# OUTSIDE
+git remote add origin ssh://docker@DROPLET_INSTANCE_IP/home/docker/sites/laravel-base.git
+git push origin master
+# Permission denied
+rsync --archive --chown=docker:docker ~/.ssh /home/docker
+git push origin master
+
+# IN SERVER
+docker-compose up --build
+docker-compose run --rm composer install
+copy .env # change APP_HOST to http://IP
+docker-compose run --rm artisan key:generate
+docker-compose run --rm artisan migrate
+docker-compose run --rm artisan db:seed
+
+docker-compose -f docker-compose.prod.yml up -d --build
