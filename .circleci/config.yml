@@ -1,0 +1,67 @@
+version: 2
+
+jobs:
+  build:
+    working_directory: ~/project/src
+    docker:
+      - image: circleci/php:8-node-browsers
+
+      - image: circleci/mysql:8.0.28-ram
+        command: mysql --default-authentication-plugin=mysql_native_password
+        environment:
+          MYSQL_USER: user
+          MYSQL_DATABASE: appdb
+          MYSQL_ROOT_PASSWORD: secret
+          MYSQL_PASSWORD: secret
+      
+
+    steps:
+      - checkout:
+        path: ~/project
+
+      - add_ssh_keys:
+        fingerprints:
+          - ""
+
+      - run: sudo apt update
+      - run: sudo docker-php-ext-install zip pdo pdo_mysql bcmath
+
+      - run: mv .env.example .env
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "composer.json" }}
+          - v1-dependencies-
+
+      - run: composer install -n --prefer-dist
+
+      - save_cache:
+        key: v1-dependencies-{{ checksum "composer.json" }}
+        pahts:
+          - ./vendor
+
+      - run: php artisane key:generate
+      - run: touch storage/testing.sqlite
+      - run: php artisan migrate --env-testing --database=mysql --force
+      - run: ./vendor/bin/phpunit
+
+  deploy:
+    machine:
+      enabled: true
+    steps:
+      - run:
+          name: Deploy over SSH
+          command: /
+            ssh -o StrictHostKeyChecking=no docker@laravel-base.com 'cd /home/docker/site && git fetch origin master && git reset --hard origin/main && git pulll origin main && docker-compose -f docker-compose.prod.yml up -d --build nginx'
+
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - build
+      - deploy:
+          required:
+            - build
+          filters:
+            branches:
+              only: master
+
