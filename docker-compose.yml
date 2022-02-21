@@ -8,7 +8,7 @@ services:
     php:
         build:
             context: .
-            dockerfile: php.dockerfile
+            dockerfile: ./docker/php/Dockerfile
         container_name: php
         volumes:
             - ./src:/var/www/html:delegated
@@ -30,9 +30,9 @@ services:
         ports:
             - 4306:3306
         volumes:
-            - ./mysql/data:/var/lib/mysql
-            - ./mysql/log:/var/log/mysql
-            - ./mysql/my.cnf:/etc/mysql/my.cnf
+            - ./.mysqldata:/var/lib/mysql
+            # - ./docker/mysql/log:/var/log/mysql
+            - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
         # Fix mbind error
         # This is could be a initial fix for now, this might disable the mysql security features
         # https://thegeekbin.com/mbind-operation-not-permitted-docker-mysql/
@@ -42,7 +42,7 @@ services:
     nginx:
         build:
             context: .
-            dockerfile: nginx.dockerfile 
+            dockerfile: ./docker/nginx/Dockerfile
         container_name: nginx
         depends_on:
             - php
@@ -70,7 +70,6 @@ services:
     #         - ./src:/var/www/html
 
     composer:
-        user: 1000:1000
         image: composer:latest
         container_name: composer
         volumes:
@@ -80,10 +79,9 @@ services:
             - app
 
     artisan:
-        user: 1000:1000
         build:
             context: .
-            dockerfile: php.dockerfile
+            dockerfile: ./docker/php/Dockerfile
         container_name: artisan
         volumes:
             - ./src:/var/www/html
@@ -105,7 +103,7 @@ services:
     phpunit:
         build:
             context: .
-            dockerfile: php.dockerfile
+            dockerfile: ./docker/php/Dockerfile
         container_name: phpunit
         depends_on:
             - mysql
@@ -125,10 +123,9 @@ services:
             - app
 
     scheduler:
-        user: 1000:1000
         build:
             context: .
-            dockerfile: php.dockerfile
+            dockerfile: ./docker/php/Dockerfile
         container_name: scheduler
         volumes:
             - ./src:/var/www/html

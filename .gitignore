@@ -1,2 +1,1 @@
-/mysql/data
-/mysql/log
+/.mysqldata/*
