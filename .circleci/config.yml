@@ -17,11 +17,11 @@ jobs:
 
     steps:
       - checkout:
-        path: ~/project
+          path: ~/project
 
       - add_ssh_keys:
-        fingerprints:
-          - ""
+          fingerprints:
+            - "42:b8:77:3c:fa:5c:16:bf:01:7d:df:00:f4:8d:39:ee"
 
       - run: sudo apt update
       - run: sudo docker-php-ext-install zip pdo pdo_mysql bcmath
@@ -35,9 +35,9 @@ jobs:
       - run: composer install -n --prefer-dist
 
       - save_cache:
-        key: v1-dependencies-{{ checksum "composer.json" }}
-        pahts:
-          - ./vendor
+          key: v1-dependencies-{{ checksum "composer.json" }}
+          pahts:
+            - ./vendor
 
       - run: php artisane key:generate
       - run: touch storage/testing.sqlite
