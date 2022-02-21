@@ -7,7 +7,6 @@ jobs:
       - image: circleci/php:8-node-browsers
 
       - image: circleci/mysql:8.0.28-ram
-        command: mysql --default-authentication-plugin=mysql_native_password
         environment:
           MYSQL_USER: user
           MYSQL_DATABASE: appdb
