@@ -2,6 +2,14 @@
 
 This is my basic workflow for using Docker and Docker Compose with Laravel development.
 
+## Boilerplate features
+- API authentication with Sanctum (WIP)
+- Jetstream or React or Angular Frontend scaffold (WIP)
+- SCSS or tailwind css styling (WIP)
+- Permissions
+- Role
+- Database backup schedule midnight (WIP)
+
 ## Getting Started
 
 Make sure you have [Docker for windows installed](https://docs.docker.com/docker-for-windows/install/) or  [Docker for mac installed](https://docs.docker.com/docker-for-mac/install/)  on your system, and then copy this directory to a desired location on your development machine. 
