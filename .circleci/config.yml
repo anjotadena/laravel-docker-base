@@ -36,7 +36,7 @@ jobs:
 
       - save_cache:
           key: v1-dependencies-{{ checksum "composer.json" }}
-          pahts:
+          paths:
             - ./vendor
 
       - run: php artisane key:generate
