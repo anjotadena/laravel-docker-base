@@ -6,10 +6,8 @@ jobs:
     docker:
       - image: circleci/php:8-node-browsers
 
-      - image: circleci/mysql:5.7-ram
-        command: mysqld --default-authentication-plugin=mysql_native_password
+      - image: circleci/mysql:8.0.28-ram
         environment:
-          MYSQL_ALLOW_EMPTY_PASSWORD: yes
           MYSQL_USER: user
           MYSQL_DATABASE: appdb
           MYSQL_ROOT_PASSWORD: secret
@@ -41,8 +39,8 @@ jobs:
             - ./vendor
 
       - run: php artisan key:generate
-      - run: touch storage/testing.sqlite
-      - run: php artisan migrate --env=testing --database=mysql --force
+      # - run: touch storage/testing.sqlite
+      - run: php artisan migrate --env=testing --force
       - run: ./vendor/bin/phpunit
 
   deploy:
