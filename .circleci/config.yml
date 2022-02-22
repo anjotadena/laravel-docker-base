@@ -9,6 +9,7 @@ jobs:
       - image: circleci/mysql:5.7-ram
         command: mysqld --default-authentication-plugin=mysql_native_password
         environment:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
           MYSQL_USER: user
           MYSQL_DATABASE: appdb
           MYSQL_ROOT_PASSWORD: secret
