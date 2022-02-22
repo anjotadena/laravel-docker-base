@@ -1,4 +1,5 @@
 # Laravel Docker Workflow (WIP)
+[![CircleCI](https://circleci.com/gh/anjotadena/laravel-docker-base/tree/master.svg?style=svg)](https://circleci.com/gh/anjotadena/laravel-docker-base/tree/master)
 
 This is my basic workflow for using Docker and Docker Compose with Laravel development.
 
