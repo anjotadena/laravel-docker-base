@@ -40,7 +40,7 @@ jobs:
 
       - run: php artisan key:generate
       - run: touch storage/testing.sqlite
-      - run: php artisan migrate --env-testing --database=mysql --force
+      - run: php artisan migrate --env=testing --database=mysql --force
       - run: ./vendor/bin/phpunit
 
   deploy:
@@ -49,7 +49,7 @@ jobs:
     steps:
       - run:
           name: Deploy over SSH
-          command: /
+          command: |
             ssh -o StrictHostKeyChecking=no docker@laravel-base.com 'cd /home/docker/site && git fetch origin master && git reset --hard origin/main && git pulll origin main && docker-compose -f docker-compose.prod.yml up -d --build nginx'
 
 workflows:
