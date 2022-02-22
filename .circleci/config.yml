@@ -38,7 +38,7 @@ jobs:
           paths:
             - ./vendor
 
-      - run: php artisane key:generate
+      - run: php artisan key:generate
       - run: touch storage/testing.sqlite
       - run: php artisan migrate --env-testing --database=mysql --force
       - run: ./vendor/bin/phpunit
