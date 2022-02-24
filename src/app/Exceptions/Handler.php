@@ -6,6 +6,7 @@ use App\Traits\JsonResponser;
 use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Response;
+use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
@@ -52,8 +53,18 @@ class Handler extends ExceptionHandler
             if ($e instanceof NotFoundHttpException) {
                 return $this->messageResponse(__('Endpoint not found.'), Response::HTTP_NOT_FOUND);
             }
-                
-            return $this->messageResponse($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+
+            if ($e instanceof ValidationException) {
+                return $this->errorResponse([
+                    'message' => __('Invalid data provided.'),
+                    'errors' => $e->errors()
+                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+
+            // Don't display relevant error when debug is false
+            $isAppOnDebug = (bool) config('app.debug', false);
+
+            return $this->messageResponse($isAppOnDebug ? $e->getMessage() : __('Ooop! Something wen\'t wrong. Please contact developer.'), Response::HTTP_INTERNAL_SERVER_ERROR);
         });
     }
 }

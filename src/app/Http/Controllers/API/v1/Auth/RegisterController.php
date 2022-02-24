@@ -2,31 +2,19 @@
 
 namespace App\Http\Controllers\API\v1\Auth;
 
+use App\Actions\Auth\UserRegister;
 use App\Http\Controllers\API\BaseController;
-use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Resources\Auth\RegisterResource;
+use Illuminate\Http\Response;
 
 class RegisterController extends BaseController
 {
-    public function __invoke(Request $request)
+    public function __invoke(RegisterRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'email' => 'required|email',
-            'password' => 'required'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors, 422);
-        }
-
-        $input = $request->all();
-        $input['password'] = bcrypt($input['password']);
-        $user = User::create($input);
-        $success['token'] =  $user->createToken('MyApp')->plainTextToken;
-        $success['name'] =  $user->name;
-   
-        return response()->json(['data' => $user]);
+        return $this->successResponse(
+            new RegisterResource(
+                UserRegister::execute($request->all())
+            ), Response::HTTP_CREATED);
     }
 }
