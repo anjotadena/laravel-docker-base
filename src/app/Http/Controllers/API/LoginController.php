@@ -2,21 +2,25 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Actions\Auth\UserLogin;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Resources\Auth\LoginResource;
 
-class LoginController extends Controller
+class LoginController extends BaseController
 {
-    public function store(Request $request)
+    /**
+     * POST Login user
+     *
+     * @param LoginRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(LoginRequest $request)
     {
-        if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) { 
-            $user = Auth::user(); 
-            $success['token'] =  $user->createToken('MyApp')->plainTextToken; 
-            $success['name'] =  $user->name;
-   
-            return response()->json(['message' => 'User login successfully.'], 201);
-        } 
-        return response()->json(['message' => 'Unathorize user'], 3);
-    }    
+        return $this->successResponse(new LoginResource(
+            UserLogin::execute([
+                'email' => $request->email,
+                'password' => $request->password
+            ])
+        ));
+    }
 }

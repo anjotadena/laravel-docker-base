@@ -46,4 +46,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(Post::class);
     }
+
+    /**
+     * Generate user api token base on auth_toke_key
+     *
+     * @return string
+     */
+    public function generateAPIToken(): string
+    {
+        return $this->createToken(config('api.auth_token_key'))->plainTextToken;
+    }
 }
