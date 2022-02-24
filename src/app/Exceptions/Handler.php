@@ -4,8 +4,10 @@ namespace App\Exceptions;
 
 use App\Traits\JsonResponser;
 use Exception;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Response;
+use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
@@ -59,6 +61,18 @@ class Handler extends ExceptionHandler
                     'message' => __('Invalid data provided.'),
                     'errors' => $e->errors()
                 ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+
+            if ($e instanceof UnauthorizedException) {
+                return $this->errorResponse([
+                    'message' => $e->getMessage()
+                ], Response::HTTP_UNAUTHORIZED);
+            }
+
+            if ($e instanceof AuthenticationException) {
+                return $this->errorResponse([
+                    'message' => $e->getMessage()
+                ], Response::HTTP_FORBIDDEN);
             }
 
             // Don't display relevant error when debug is false
