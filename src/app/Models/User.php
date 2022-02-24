@@ -52,8 +52,8 @@ class User extends Authenticatable
      *
      * @return string
      */
-    public function generateAPIToken(): string
+    public function generateAPIToken($abilities = ['*']): string
     {
-        return $this->createToken(config('api.auth_token_key'))->plainTextToken;
+        return $this->createToken(config('api.auth_token_key'), $abilities)->plainTextToken;
     }
 }
