@@ -1,15 +1,15 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers\API\v1\Auth;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\API\BaseController;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class RegisterController extends Controller
+class RegisterController extends BaseController
 {
-    public function store(Request $request)
+    public function __invoke(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required',

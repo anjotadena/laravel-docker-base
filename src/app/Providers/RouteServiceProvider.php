@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Route;
 
 class RouteServiceProvider extends ServiceProvider
 {
+    protected $apiNamespace ='App\Http\Controllers\API';
+
     /**
      * The path to the "home" route for your application.
      *
@@ -29,10 +31,7 @@ class RouteServiceProvider extends ServiceProvider
         $this->configureRateLimiting();
 
         $this->routes(function () {
-            Route::prefix('api')
-                ->middleware('api')
-                ->namespace($this->namespace)
-                ->group(base_path('routes/api.php'));
+            $this->initializeAPIRoutes(config('api.version', 'v1')); // current api version
 
             Route::middleware('web')
                 ->namespace($this->namespace)
@@ -50,5 +49,14 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
+    }
+
+    protected function initializeAPIRoutes($version)
+    {
+        Route::prefix('api')
+            ->middleware(['api', 'api_version:' . $version])
+            ->namespace("{$this->apiNamespace}\\{$version}")
+            ->prefix('api/' . $version)
+            ->group(base_path("routes/api/{$version}.php"));
     }
 }

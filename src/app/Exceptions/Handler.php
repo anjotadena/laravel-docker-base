@@ -2,11 +2,17 @@
 
 namespace App\Exceptions;
 
+use App\Traits\JsonResponser;
+use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
 {
+    use JsonResponser;
+
     /**
      * A list of the exception types that are not reported.
      *
@@ -36,6 +42,18 @@ class Handler extends ExceptionHandler
     {
         $this->reportable(function (Throwable $e) {
             //
+        });
+
+        $this->renderable(function (Exception $e, $request) {
+            if (!$request->is('api/*')) {
+                return;
+            }
+
+            if ($e instanceof NotFoundHttpException) {
+                return $this->messageResponse(__('Endpoint not found.'), Response::HTTP_NOT_FOUND);
+            }
+                
+            return $this->messageResponse($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
         });
     }
 }

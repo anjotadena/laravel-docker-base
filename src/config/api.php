@@ -1,6 +1,9 @@
 <?php
 
 return [
+
+    'version' => 'v1',
+
     /**
      * API Auth secret token
      */
