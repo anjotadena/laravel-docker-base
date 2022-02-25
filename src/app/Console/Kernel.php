@@ -19,7 +19,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')->hourly();
         $schedule->command('cache:clear')->hourly();
 
-        $schedule->job(new GetFood, 'food')->everyTwoMinutes();
+        // $schedule->job(new GetFood, 'food')->everyTwoMinutes();
     }
 
     /**
