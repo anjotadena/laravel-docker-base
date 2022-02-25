@@ -10,7 +10,9 @@ class LogoutController extends APIBaseController
 {
     public function __invoke()
     {
-        Auth::logout();
+        $user = request()->user();
+
+        $user->tokens()->where('id', auth()->id())->delete();
 
         return $this->successResponse(null, Response::HTTP_NO_CONTENT);
     }

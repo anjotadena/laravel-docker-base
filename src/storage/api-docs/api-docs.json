@@ -1,7 +1,7 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "Your super  ApplicationAPI",
+        "title": "Laravel docker base",
         "version": "1.0.0"
     },
     "paths": {
