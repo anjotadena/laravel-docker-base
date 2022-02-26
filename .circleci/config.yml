@@ -6,42 +6,45 @@ jobs:
     docker:
       - image: circleci/php:8-node-browsers
 
-      - image: circleci/mysql:8.0.28-ram
-        environment:
-          MYSQL_USER: user
-          MYSQL_DATABASE: appdb
-          MYSQL_ROOT_PASSWORD: secret
-          MYSQL_PASSWORD: secret
-      
-
     steps:
       - checkout:
           path: ~/project
 
-      - add_ssh_keys:
-          fingerprints:
-            - "42:b8:77:3c:fa:5c:16:bf:01:7d:df:00:f4:8d:39:ee"
+      - run: 
+          name: "Prepare Environment"
+          command: |
+            sudo apt update
+            sudo docker-php-ext-install zip pdo pdo_mysql bcmath
 
-      - run: sudo apt update
-      - run: sudo docker-php-ext-install zip pdo pdo_mysql bcmath
+      - run:
+          name: "Create Environment File"
+          command: |
+            mv .env.testing .env
 
-      - run: mv .env.example .env
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "composer.json" }}
-          - v1-dependencies-
+            # "composer.lock" can be used if it is committed to the repo
+            - v1-dependencies-{{ checksum "composer.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
 
-      - run: composer install -n --prefer-dist
+      - run:
+          name: "Install Dependencies"
+          command: composer install -n --prefer-dist
 
       - save_cache:
           key: v1-dependencies-{{ checksum "composer.json" }}
           paths:
             - ./vendor
 
-      - run: php artisan key:generate
+      - run:
+          name: "Install Dependencies"
+          command: php artisan key:generate
+
       # - run: touch storage/testing.sqlite
-      - run: php artisan migrate --env=testing --force
-      - run: ./vendor/bin/phpunit
+      - run:
+          name: "Run testing"
+          command: ./vendor/bin/phpunit
 
   deploy:
     machine:
@@ -57,10 +60,4 @@ workflows:
   build-and-deploy:
     jobs:
       - build
-      - deploy:
-          requires:
-            - build
-          filters:
-            branches:
-              only: master
 
