@@ -17,7 +17,7 @@ class UserLoginTest extends TestCase
     {
         $user = User::factory()->create(['password' => 'correct_pass']);
 
-        $user = UserLogin::execute(['email' => $user->email, 'password' => 'correct_passx']);
+        $user = UserLogin::execute(['email' => $user->email, 'password' => 'correct_pass']);
 
         $this->actingAs($user);
 
