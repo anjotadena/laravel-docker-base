@@ -10,6 +10,9 @@ This is my basic workflow for using Docker and Docker Compose with Laravel devel
 - Permissions
 - Role
 - Database backup schedule midnight (WIP)
+- CI/CD with circleCI
+- Unit/Feature Testing
+- Redis ready for caching and queuing
 
 ## Getting Started
 
