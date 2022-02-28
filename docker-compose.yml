@@ -132,3 +132,9 @@ services:
         entrypoint: ["php", "artisan", "schedule:work"]
         networks:
             - app
+
+    adminer:
+        image: adminer
+        restart: always
+        ports:
+            - 8080:8080
