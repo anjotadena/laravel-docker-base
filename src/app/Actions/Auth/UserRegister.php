@@ -16,7 +16,7 @@ class UserRegister {
             $user = User::create($payload);
 
             self::sendEmailOnQueue($user, self::createVerificationCode($user));
-            
+
             return $user;
         });
     }
