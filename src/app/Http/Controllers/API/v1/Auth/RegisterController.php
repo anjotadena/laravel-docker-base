@@ -52,9 +52,8 @@ class RegisterController extends BaseController
     */
     public function __invoke(RegisterRequest $request)
     {
-        return $this->successResponse(
-            new RegisterResource(
-                UserRegister::execute($request->all())
-            ), Response::HTTP_CREATED);
+        $action = UserRegister::execute($request->all());
+
+        return $this->successResponse(new RegisterResource($action), Response::HTTP_CREATED);
     }
 }
