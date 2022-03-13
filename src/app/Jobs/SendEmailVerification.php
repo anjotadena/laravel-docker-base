@@ -17,14 +17,18 @@ class SendEmailVerification implements ShouldQueue
 
     private $user;
 
+    private $code;
+
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(User $user)
+    public function __construct(User $user, string $code)
     {
         $this->user = $user;
+
+        $this->code = $code;
     }
 
     /**
@@ -37,7 +41,7 @@ class SendEmailVerification implements ShouldQueue
         Mail::to($this->user->email)->send(
             new VerificationMail([
                 'name' => $this->user->name,
-                'code' => $this->user->verificationCodes()->generate()
+                'code' => $this->code
             ])
         );
     }

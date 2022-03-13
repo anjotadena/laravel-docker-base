@@ -18,7 +18,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(User::class)->constrained();
             $table->string('code');
-            $table->timestamp('expired_at')->default(now()->addHour());
+            $table->timestamp('expired_at')->nullable();
             $table->timestamp('activated_at')->nullable();
             $table->timestamps();
         });

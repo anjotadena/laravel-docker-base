@@ -70,10 +70,17 @@ class User extends Authenticatable
         return $this->createToken(config('api.auth_token_key'), $abilities)->plainTextToken;
     }
 
-    public function generateVerificationCode(): string
+    public function verifyEmail(): User
     {
-        $code = random_int(100000, 999999);
+        $this->email_verified_at = now();
 
-        return $code;
+        $this->save();
+
+        return $this;
+    }
+
+    public function isEmailVerified(): bool
+    {
+        return !!$this->email_verified_at;
     }
 }

@@ -4,15 +4,24 @@ namespace App\Actions\Auth;
 
 use App\Jobs\SendEmailVerification;
 use App\Models\User;
+use App\Models\VerificationCode;
+use Illuminate\Support\Facades\DB;
 
 class UserRegister {
     public static function execute($payload): User
     {
-        $user = User::create($payload);
+        return DB::transaction(function () use ($payload) {
+            $user = User::create($payload);
 
-        // Send email
-        dispatch(new SendEmailVerification($user));
+            // generate verification code
+            $code = VerificationCode::generate();
 
-        return $user;
+            $verification = $user->verificationCodes()->create(['user_id' => $user->id, 'code' => $code, 'expired_at' => now()->addHour()]);
+
+            // Send email
+            dispatch(new SendEmailVerification($user, $verification->code));
+
+            return $user;
+        });
     }
 }
