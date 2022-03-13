@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\API\v1\Auth;
 
 use App\Actions\Auth\UserRegister;
+use App\Actions\Auth\UserVerifyEmail;
 use App\Http\Controllers\API\BaseController;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\VerifyCodeRequest;
 use App\Http\Resources\Auth\RegisterResource;
 use Illuminate\Http\Response;
 
-class RegisterController extends BaseController
+class VerifyCodeController extends BaseController
 {
     /**
     * @OA\Post(
@@ -50,10 +52,10 @@ class RegisterController extends BaseController
     *      @OA\Response(response=404, description="Resource Not Found"),
     * )
     */
-    public function __invoke(RegisterRequest $request)
+    public function __invoke(VerifyCodeRequest $request)
     {
-        $action = UserRegister::execute($request->all());
+        UserVerifyEmail::execute($request->validated());
 
-        return $this->successResponse(new RegisterResource($action), Response::HTTP_CREATED);
+        return $this->messageResponse(__('Email successfully verified.'), Response::HTTP_OK);
     }
 }
