@@ -37,7 +37,7 @@ class SendEmailVerification implements ShouldQueue
         Mail::to($this->user->email)->send(
             new VerificationMail([
                 'name' => $this->user->name,
-                'code' => $this->user->generateVerificationCode()
+                'code' => $this->user->verificationCodes()->generate()
             ])
         );
     }

@@ -55,6 +55,11 @@ class User extends Authenticatable
         return $this->hasMany(Post::class);
     }
 
+    public function verificationCodes()
+    {
+        return $this->hasMany(VerificationCode::class);
+    }
+
     /**
      * Generate user api token base on auth_toke_key
      *
