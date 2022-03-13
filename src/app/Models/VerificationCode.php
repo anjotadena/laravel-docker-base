@@ -25,9 +25,11 @@ class VerificationCode extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function generate(): string
+    public function generate(int $userId): string
     {
         $code = random_int(100000, 999999);
+
+        $this->create(['user_id' => $userId, 'code' => $code]);
 
         return $code;
     }
