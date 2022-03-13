@@ -3,9 +3,11 @@
 namespace Tests\Unit\Actions\Auth;
 
 use App\Actions\Auth\UserRegister;
+use App\Mail\VerificationMail;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\User;
+use Illuminate\Support\Facades\Mail;
 
 class UserRegisterTest extends TestCase
 {
@@ -26,5 +28,18 @@ class UserRegisterTest extends TestCase
         $this->assertEquals('test user', $user->name);
         $this->assertEquals('user@test.com', $user->email);
         $this->assertNotEmpty($user->password);
+    }
+
+    public function testShouldSendVerificationEmail()
+    {
+        Mail::fake();
+
+        UserRegister::execute([
+            'name' => 'test user',
+            'email' => 'user@test.com',
+            'password' => 'password'
+        ]);
+
+        Mail::assertQueued(VerificationMail::class);
     }
 }
