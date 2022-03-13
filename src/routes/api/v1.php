@@ -28,10 +28,6 @@ Route::namespace("Auth")->group(function () {
         ->group(function () {
             Route::post('/logout', LogoutController::class)->name('auth.logout');      
         });
-
-    // protected by is admin middelware
-    Route::group(['middleware' => 'is_admin'], function () {
-    });
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
