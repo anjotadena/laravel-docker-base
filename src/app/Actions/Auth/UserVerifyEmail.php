@@ -2,8 +2,8 @@
 
 namespace App\Actions\Auth;
 
+use App\Exceptions\InvalidCodeException;
 use App\Models\User;
-use Exception;
 
 class UserVerifyEmail {
     public static function execute($payload): bool
@@ -18,7 +18,7 @@ class UserVerifyEmail {
 
         // either invalid or expired throw generic error
         if (!$verificationCode) {
-            throw new Exception('Invalid code.');
+            throw new InvalidCodeException;
         }
 
         $verificationCode->activate();
