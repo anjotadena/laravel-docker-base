@@ -5,41 +5,37 @@ namespace App\Http\Controllers\API\v1\Auth;
 use App\Actions\Auth\UserRegister;
 use App\Http\Controllers\API\BaseController;
 use App\Http\Requests\Auth\RegisterRequest;
-use App\Http\Resources\Auth\RegisterResource;
 use Illuminate\Http\Response;
 
 class RegisterController extends BaseController
 {
     /**
     * @OA\Post(
-    * path="/api/v1/register",
-    * operationId="Register",
-    * tags={"Register"},
-    * summary="User Register",
-    * description="User Register here",
+    * path="/register",
+    * operationId="Register User",
+    * tags={"User Authentication"},
+    * summary="Register User",
+    * description="Register user here",
     *     @OA\RequestBody(
-    *         @OA\JsonContent(),
-    *         @OA\MediaType(
-    *            mediaType="multipart/form-data",
+    *         @OA\JsonContent(
     *            @OA\Schema(
     *               type="object",
-    *               required={"name","email", "password", "password_confirmation"},
+    *               required={"name","email", "password"},
     *               @OA\Property(property="name", type="text"),
     *               @OA\Property(property="email", type="text"),
-    *               @OA\Property(property="password", type="password"),
-    *               @OA\Property(property="password_confirmation", type="password")
+    *               @OA\Property(property="password", type="password")
     *            ),
-    *        ),
+    *        )
     *    ),
     *      @OA\Response(
     *          response=201,
     *          description="Register Successfully",
-    *          @OA\JsonContent()
-    *       ),
-    *      @OA\Response(
-    *          response=200,
-    *          description="Register Successfully",
-    *          @OA\JsonContent()
+    *          @OA\JsonContent(
+    *             @OA\Schema(
+    *                  type="object",
+    *                  @OA\Property(property="message", type="text")
+    *            ),
+    *          )
     *       ),
     *      @OA\Response(
     *          response=422,
@@ -52,8 +48,8 @@ class RegisterController extends BaseController
     */
     public function __invoke(RegisterRequest $request)
     {
-        $action = UserRegister::execute($request->all());
+        UserRegister::execute($request->all());
 
-        return $this->successResponse(new RegisterResource($action), Response::HTTP_CREATED);
+        return $this->messageResponse(__('User created successfuly. Please check your email for verification code.'), Response::HTTP_CREATED);
     }
 }
