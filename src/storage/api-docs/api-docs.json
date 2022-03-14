@@ -1,45 +1,75 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "Laravel docker base",
-        "version": "1.0.0"
+        "title": "Laravel Base API Documentation",
+        "description": "Coll RESTFul API for laravel base",
+        "contact": {
+            "email": "tadena.anjo@gmail.com"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
+        "version": "1.0.3"
     },
+    "servers": [
+        {
+            "url": "http://laravel-base.test",
+            "description": "Larabel Base"
+        }
+    ],
     "paths": {
-        "/api/v1/register": {
+        "/login": {
             "post": {
                 "tags": [
-                    "Register"
+                    "User Authentication"
                 ],
-                "summary": "User Register",
-                "description": "User Register here",
-                "operationId": "Register",
+                "summary": "Login registered user",
+                "description": "Login registered user",
+                "operationId": "userLogin",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LoginResource"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                }
+            }
+        },
+        "/logout": {
+            "post": {
+                "tags": [
+                    "User Authentication"
+                ],
+                "summary": "Logout User",
+                "description": "Logout user here",
+                "operationId": "Logout User",
                 "requestBody": {
                     "content": {
-                        "multipart/form-data": {
-                            "schema": {
-                                "required": [
-                                    "name",
-                                    "email",
-                                    "password",
-                                    "password_confirmation"
-                                ],
-                                "properties": {
-                                    "name": {
-                                        "type": "text"
-                                    },
-                                    "email": {
-                                        "type": "text"
-                                    },
-                                    "password": {
-                                        "type": "password"
-                                    },
-                                    "password_confirmation": {
-                                        "type": "password"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        },
                         "application/json": {
                             "schema": {}
                         }
@@ -54,7 +84,34 @@
                             }
                         }
                     },
-                    "200": {
+                    "401": {
+                        "description": "Unauthorized user",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/register": {
+            "post": {
+                "tags": [
+                    "User Authentication"
+                ],
+                "summary": "Register User",
+                "description": "Register user here",
+                "operationId": "Register User",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {}
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
                         "description": "Register Successfully",
                         "content": {
                             "application/json": {
@@ -81,6 +138,64 @@
         }
     },
     "components": {
+        "schemas": {
+            "LoginRequest": {
+                "title": "Login request",
+                "description": "Login request payload or json data",
+                "required": [
+                    "password"
+                ],
+                "properties": {
+                    "email": {
+                        "title": "email",
+                        "description": "User email",
+                        "type": "string",
+                        "example": "test@gmail.com"
+                    },
+                    "password": {
+                        "title": "password",
+                        "description": "User password",
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "xml": {
+                    "name": "LoginRequest"
+                }
+            },
+            "LoginResource": {
+                "title": "LoginResource",
+                "description": "Login resource",
+                "properties": {
+                    "token": {
+                        "title": "token",
+                        "description": "User auth token"
+                    },
+                    "name": {
+                        "title": "name",
+                        "description": "User name"
+                    }
+                },
+                "type": "object",
+                "xml": {
+                    "name": "LoginResource"
+                }
+            },
+            "RegisterResource": {
+                "title": "RegisterResource",
+                "description": "Register resource",
+                "properties": {
+                    "message": {
+                        "title": "message",
+                        "description": "Message"
+                    }
+                },
+                "type": "object",
+                "xml": {
+                    "name": "RegisterResource"
+                }
+            }
+        },
         "securitySchemes": {
             "sanctum": {
                 "type": "apiKey",
@@ -90,6 +205,12 @@
             }
         }
     },
+    "tags": [
+        {
+            "name": "Laravel Base",
+            "description": "API Endpoints of Laravel Base"
+        }
+    ],
     "security": [
         []
     ]
