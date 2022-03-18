@@ -1,8 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\PostController;
-use App\Http\Controllers\CommentController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -18,8 +17,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/posts', [PostController::class, 'index']);
-Route::get('/posts/get', [PostController::class, 'get']);
-Route::get('/posts/{post}', [PostController::class, 'show']);
-Route::get('/posts/{post}/comments', [CommentController::class, 'index']);
-Route::get('/posts/{post}/comments/{comment}', [CommentController::class, 'show']);
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth'])->name('dashboard');
+
+require __DIR__.'/auth.php';
