@@ -2,12 +2,16 @@
 
 namespace App\Http\Livewire;
 
-use Illuminate\Support\Facades\Log;
+use App\Models\Subscriber;
 use Livewire\Component;
 
 class LandingPage extends Component
 {
     public $email;
+
+    protected $rules = [
+        'email' => 'required|email:filter|unique:subscribers,email'
+    ];
 
     public function render()
     {
@@ -16,6 +20,10 @@ class LandingPage extends Component
 
     public function subscribe()
     {
-        Log::debug($this->email);
+        $data = $this->validate();
+
+        $subscriber = Subscriber::create($data);
+
+        $this->reset('email');
     }
 }

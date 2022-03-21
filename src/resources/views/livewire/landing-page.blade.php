@@ -3,7 +3,7 @@
         showSubscribeDialog: false,
         showSuccess: false
     }"
-    class="flex flex-col bg-indigo-900 w-full h-screen"
+    class="flex flex-col bg-white w-full h-screen"
 >
     <x-navigation></x-navigation>
 
