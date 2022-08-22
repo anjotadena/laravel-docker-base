@@ -4,7 +4,7 @@ jobs:
   build:
     working_directory: ~/project/src
     docker:
-      - image: circleci/php:8-node-browsers
+      - image: cimg/php:8.1.9-browsers
 
     steps:
       - checkout:
