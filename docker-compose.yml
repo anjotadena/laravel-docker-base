@@ -1,32 +1,32 @@
 version: '3.8'
 
 networks:
-    app:
-        name: app
+    ldb-app:
+        name: ldb-app
 
 services:
     php:
         build:
             context: .
             dockerfile: ./docker/php/Dockerfile
-        container_name: php
+        container_name: ldb-php
         volumes:
             - ./src:/var/www/html:delegated
         depends_on:
             - mysql
         networks:
-            - app
-    
+            - ldb-app
+
     mysql:
         image: mysql:8.0.28
-        container_name: mysql
+        container_name: ldb-mysql
         environment:
             MYSQL_DATABASE: appdb
             MYSQL_USER: user
             MYSQL_PASSWORD: secret
             MYSQL_ROOT_PASSWORD: secret
         networks:
-            - app
+            - ldb-app
         ports:
             - 4306:3306
         volumes:
@@ -38,24 +38,24 @@ services:
         # https://thegeekbin.com/mbind-operation-not-permitted-docker-mysql/
         security_opt:
             - seccomp:unconfined
-    
+
     nginx:
         build:
             context: .
             dockerfile: ./docker/nginx/Dockerfile
-        container_name: nginx
+        container_name: ldb-nginx
         depends_on:
             - php
             - mysql
             - redis
         networks:
-            - app
+            - ldb-app
         ports:
             - 80:80
             - 443:443
         volumes:
             - ./src:/var/www/html:delegated
-    
+
     # apache:
     #     build:
     #         context: .
@@ -70,71 +70,78 @@ services:
     #         - ./src:/var/www/html
 
     composer:
-        image: composer:latest
-        container_name: composer
+        build:
+            context: .
+            dockerfile: ./docker/php/Dockerfile
+        container_name: ldb-composer
         volumes:
-            - ./src:/var/www/html
-        working_dir: /var/www/html
+            - ./src:/var/www/html:delegated
+        entrypoint: [ "composer" ]
         networks:
-            - app
+            - ldb-app
 
     artisan:
         user: 1000:1000
         build:
             context: .
             dockerfile: ./docker/php/Dockerfile
-        container_name: artisan
+        container_name: ldb-artisan
         volumes:
             - ./src:/var/www/html
         working_dir: /var/www/html
-        entrypoint: ["php", "artisan"]
+        entrypoint: [ "php", "artisan" ]
         networks:
-            - app
+            - ldb-app
 
     npm:
         image: node:17.5.0
-        container_name: npm
+        container_name: ldb-npm
         volumes:
             - ./src:/var/www/html
         working_dir: /var/www/html
-        entrypoint: ["npm"]
+        entrypoint: [ "npm" ]
         networks:
-            - app
+            - ldb-app
 
     phpunit:
         build:
             context: .
             dockerfile: ./docker/php/Dockerfile
-        container_name: phpunit
+        container_name: ldb-phpunit
         volumes:
             - ./src:/var/www/html
         working_dir: /var/www/html
-        entrypoint: ["/var/www/html/vendor/bin/phpunit", "--configuration=/var/www/html/phpunit.xml"]
+        entrypoint:
+            [
+                "/var/www/html/vendor/bin/phpunit",
+                "--configuration=/var/www/html/phpunit.xml"
+            ]
         networks:
-            - app
+            - ldb-app
 
     redis:
         image: redis:latest
-        container_name: redis
+        container_name: ldb-redis
         ports:
             - 6379:6379
         networks:
-            - app
+            - ldb-app
 
     scheduler:
         build:
             context: .
             dockerfile: ./docker/php/Dockerfile
-        container_name: scheduler
+        container_name: ldb-scheduler
         volumes:
             - ./src:/var/www/html
         working_dir: /var/www/html
-        entrypoint: ["php", "artisan", "schedule:work"]
+        entrypoint: [ "php", "artisan", "schedule:work" ]
         networks:
-            - app
+            - ldb-app
 
     adminer:
         image: adminer
         restart: always
+        container_name: ldb-adminer
         ports:
             - 8080:8080
