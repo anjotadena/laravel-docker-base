@@ -94,12 +94,14 @@ services:
             - ldb-app
 
     npm:
-        image: node:17.5.0
+        user: node:node
+        build:
+            context: .
+            dockerfile: ./docker/npm/Dockerfile
         container_name: ldb-npm
         volumes:
             - ./src:/var/www/html
         working_dir: /var/www/html
-        entrypoint: [ "npm" ]
         networks:
             - ldb-app
 
