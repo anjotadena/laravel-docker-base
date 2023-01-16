@@ -145,3 +145,5 @@ services:
         container_name: ldb-adminer
         ports:
             - 8080:8080
+        networks:
+            - ldb-app
