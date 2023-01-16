@@ -13,4 +13,8 @@ RUN apk --no-cache add pcre-dev ${PHPIZE_DEPS} \
     && docker-php-ext-enable redis \
     && apk del pcre-dev ${PHPIZE_DEPS}
 
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+RUN php composer-setup.php --install-dir=/usr/bin --filename=composer
+RUN php -r "unlink('composer-setup.php');"
+
 RUN chown laravel:laravel /var/www/html
