@@ -16,4 +16,6 @@ use App\Http\Controllers\Web\HomeController;
 |
 */
 
-Route::get('/', [HomeController::class, 'index']);
+Route::get('/{any}', function () {
+    return view('index');
+})->where('any', '.*');
