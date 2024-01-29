@@ -3,6 +3,12 @@
 
 This is my basic workflow for using Docker and Docker Compose with Laravel development.
 
+## Technology Used
+- Laravel 10
+- React (Typescript)
+- Docker
+- MySql
+
 ## Boilerplate features
 - API authentication with Sanctum (WIP)
 - Jetstream or React or Angular Frontend scaffold (WIP)
@@ -46,6 +52,10 @@ Scheduler
 
 PHPunit testing
 - `docker-compose run --rm phpunit`
+
+## Access site
+- https://localhost
+- https://localhost/api/documentation -> API Documentation
 
 ## Container network
 Available ports to the host machine:
