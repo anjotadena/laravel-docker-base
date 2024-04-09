@@ -4,7 +4,7 @@ jobs:
   build:
     working_directory: ~/project/src
     docker:
-      - image: cimg/php:8.1.9-browsers
+      - image: cimg/php:8.1.27-browsers
 
     steps:
       - checkout:
