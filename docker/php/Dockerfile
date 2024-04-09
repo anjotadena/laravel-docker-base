@@ -1,4 +1,4 @@
-FROM php:8.1.3-fpm-alpine
+FROM php:8.1.27-fpm-alpine
 
 ADD ./docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
 
