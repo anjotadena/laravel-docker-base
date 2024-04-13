@@ -3,10 +3,10 @@ version: 2
 # See https://circleci.com/docs/2.0/deployment-integrations/ for deploy examples
 jobs:
   build:
+    working_directory: ~/project/src
+
     docker:
       - image: cimg/php:8.1.27-browsers
-
-    working_directory: ~/project/src
 
     steps:
       - checkout:
@@ -43,7 +43,7 @@ jobs:
           command: |
             mv .env.testing .env
 
-       - restore_cache: # special step to restore the dependency cache if `composer.lock` does not change
+      - restore_cache: # special step to restore the dependency cache if `composer.lock` does not change
           keys:
             - composer-v1-{{ checksum "composer.lock" }}
             # fallback to using the latest cache if no exact match is found (See https://circleci.com/docs/2.0/caching/)
