@@ -28,11 +28,11 @@ jobs:
 
       - run:
           name: "Directory checking"
-          command: ls -lah ~/project
+          command: ls -lah ~/project/src
 
       - run:
           name: "Directory checking"
-          command: cd ~/project
+          command: cd ~/project/src
 
       - run: 
           name: "Prepare Environment"
