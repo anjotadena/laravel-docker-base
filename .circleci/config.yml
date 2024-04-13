@@ -4,7 +4,7 @@ executors:
   ci-executor:
     docker:
       - image: buildpack-deps:jessie
-    working_directory: ~/project/src
+    working_directory: /tmp
 
 jobs:
   build-fe:
@@ -12,8 +12,13 @@ jobs:
     docker: 
       - image: cimg/node:20.12.2-browsers
     steps:
+      - run: mkdir -p workspace
+      - persist_to_workspace:
+          # Must be an absolute path, or relative path from working_directory. This is a directory in the execution
+          # environment which is taken to be the root directory of the workspace.
+          root: workspace
       - checkout:
-          path: ~/project/src
+          path: /tmp/workspace
       - run: 
           name: "Installing node dependencies"
           command: npm install
@@ -30,10 +35,10 @@ jobs:
 
     steps:
       - attach_workspace:
-        at: ~/project
+        at: /tmp/workspace
 
       - checkout:
-          path: ~/project/src
+          path: /tmp/workspace
 
       - run:
           name: "Directory checking"
