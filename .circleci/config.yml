@@ -73,7 +73,8 @@ workflows:
   version: 2
   build-and-deploy:
     jobs:
+      - build-fe:
       - build-be:
-          workflows:
+          requires:
             - build-fe
 
