@@ -19,6 +19,7 @@ jobs:
           command: ls -lah public
       - persist_to_workspace:
           root: .
+          path: .
 
   build-be:
     docker:
