@@ -16,7 +16,7 @@ jobs:
           command: npm run build
       - run:
           name: "Directory checking"
-          command: ls -lah
+          command: ls -lah public
 
   build-be:
     working_directory: ~/project/src
@@ -25,8 +25,7 @@ jobs:
 
     steps:
       - attach_workspace:
-        # Must be absolute path or relative path from working_directory
-        at: ~/project/src
+          at: ~/project/src
 
       - run:
           name: "Directory checking"
