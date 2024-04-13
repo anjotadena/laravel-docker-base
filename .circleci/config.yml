@@ -1,7 +1,19 @@
 version: 2
 
 jobs:
-  build:
+  build-fe:
+    working_directory: ~/project/src
+    docker: 
+      - image: circleci/node:20.12.0
+    steps:
+      - run: 
+          name: "Installing node dependencies"
+          command: npm install
+      - run: 
+          name: "Building frontend"
+          command: npm run build
+
+  build-be:
     working_directory: ~/project/src
     docker:
       - image: cimg/php:8.1.27-browsers
@@ -59,5 +71,6 @@ workflows:
   version: 2
   build-and-deploy:
     jobs:
-      - build
+      - build-fe
+      - build-be
 
