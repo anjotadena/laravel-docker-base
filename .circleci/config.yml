@@ -19,7 +19,6 @@ jobs:
           command: ls -lah public
 
   build-be:
-    working_directory: ~/project/src
     docker:
       - image: cimg/php:8.1.27-browsers
 
@@ -29,7 +28,11 @@ jobs:
 
       - run:
           name: "Directory checking"
-          command: ls -lah
+          command: ls -lah ~/project
+
+      - run:
+          name: "Directory checking"
+          command: cd ~/project
 
       - run: 
           name: "Prepare Environment"
