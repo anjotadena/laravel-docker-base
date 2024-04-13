@@ -75,4 +75,6 @@ workflows:
     jobs:
       - build-fe
       - build-be
+          requires:
+            - build-fe
 
