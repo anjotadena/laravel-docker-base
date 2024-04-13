@@ -1,0 +1,10 @@
+// @tailwind base;
+// @tailwind components;
+// @tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap");
+@import "./components/index.scss";
+@import "./template/index.scss";
+@import "./vendors/index.scss";
+@import "./tailwind/index.scss";
+@import "./docs/index.scss";

@@ -1,4 +1,4 @@
-FROM node:17.5.0
+FROM node:20.9.0
 
 RUN mkdir -p /var/www/html
 
