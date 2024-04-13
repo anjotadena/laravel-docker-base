@@ -7,7 +7,7 @@ jobs:
       - image: cimg/node:20.12.2-browsers
     steps:
       - checkout:
-          path: ~/project/src
+          path: ~/project
       - run: 
           name: "Installing node dependencies"
           command: npm install
