@@ -4,7 +4,7 @@ executors:
   ci-executor:
     docker:
       - image: buildpack-deps:jessie
-    working_directory: ~/project
+    working_directory: ~/project/src
 
 jobs:
   build-fe:
