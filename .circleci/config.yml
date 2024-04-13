@@ -13,7 +13,7 @@ jobs:
       - image: cimg/node:20.12.2-browsers
     steps:
       - checkout:
-          path: ~/project
+          path: ~/project/src
       - run: 
           name: "Installing node dependencies"
           command: npm install
@@ -33,7 +33,7 @@ jobs:
         at: ~/project
 
       - checkout:
-          path: ~/project
+          path: ~/project/src
 
       - run:
           name: "Directory checking"
