@@ -12,7 +12,7 @@ jobs:
     docker: 
       - image: cimg/node:20.12.2-browsers
     steps:
-      - run: mkdir -p workspace
+      - run: mkdir -p /tmp/workspace
       - persist_to_workspace:
           # Must be an absolute path, or relative path from working_directory. This is a directory in the execution
           # environment which is taken to be the root directory of the workspace.
