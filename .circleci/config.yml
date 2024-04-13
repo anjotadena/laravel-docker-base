@@ -17,6 +17,8 @@ jobs:
       - run:
           name: "Directory checking"
           command: ls -lah public
+      - persist_to_workspace:
+          at: ~/project/src
 
   build-be:
     docker:
