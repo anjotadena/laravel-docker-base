@@ -1,8 +1,14 @@
 version: 2
 
+executors:
+  ci-executor:
+    docker:
+      - image: buildpack-deps:jessie
+    working_directory: ~/project
+
 jobs:
   build-fe:
-    working_directory: ~/project/src
+    executor: ci-executor
     docker: 
       - image: cimg/node:20.12.2-browsers
     steps:
@@ -14,15 +20,24 @@ jobs:
       - run: 
           name: "Building frontend"
           command: npm run build
-
+      - run:
+          name: "Directory checking"
+          command: ls -lah
   build-be:
-    working_directory: ~/project/src
+    executor: ci-executor
     docker:
       - image: cimg/php:8.1.27-browsers
 
     steps:
+      - attach_workspace:
+        at: ~/project
+
       - checkout:
           path: ~/project
+
+      - run:
+          name: "Directory checking"
+          command: ls -lah
 
       - run: 
           name: "Prepare Environment"
