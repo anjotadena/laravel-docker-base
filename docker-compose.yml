@@ -102,9 +102,11 @@ services:
         volumes:
             - ./src:/var/www/html
         working_dir: /var/www/html
-        entrypoint: ["npm"]
+        command: ["npm", "run", "dev"]
         networks:
             - ldb-app
+        ports:
+            - 5173:5173
 
     phpunit:
         build:
