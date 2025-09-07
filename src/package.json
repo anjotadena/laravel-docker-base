@@ -2,9 +2,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"npm run dev:laravel\" \"npm run dev:react\"",
-    "dev:laravel": "php artisan serve",
-    "dev:react": "vite",
+    "dev": "vite --host",
+    "dev:watch": "vite --host --watch",
     "build": "tsc && vite build",
     "production": "npm run build && ./serve-prod.sh"
   },

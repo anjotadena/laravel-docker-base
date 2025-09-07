@@ -6,7 +6,14 @@ import App from './App';
 
 import './index.scss';
 
-ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
+const container = document.getElementById('root');
+
+if (!container) {
+  throw new Error('Root element not found. Make sure you have a <div id="root"></div> in your HTML.');
+}
+
+const root = ReactDOM.createRoot(container);
+root.render(
   <React.StrictMode>
     <App />
   </React.StrictMode>,
