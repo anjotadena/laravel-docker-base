@@ -79,26 +79,23 @@ cleanup_containers() {
     rm -rf src/storage/framework/views/*.php 2>/dev/null || true
     rm -rf src/storage/logs/*.log 2>/dev/null || true
     
-    # Clean up node_modules if requested or if doing a fresh install
-    if [[ $CLEAN_IMAGES == "1" ]] || [[ $FRESH_INSTALL == "1" ]]; then
-        print_status "Cleaning up node_modules..."
+    # Always clean node_modules on fresh install (force)
+    if [[ $FRESH_INSTALL == "1" ]]; then
+        print_status "Force removing node_modules and lock files..."
         rm -rf src/node_modules 2>/dev/null || true
-        rm -rf src/package-lock.json 2>/dev/null || true
+        rm -f src/package-lock.json 2>/dev/null || true
+        rm -f src/pnpm-lock.yaml 2>/dev/null || true
+        rm -f src/yarn.lock 2>/dev/null || true
+    elif [[ $CLEAN_IMAGES == "1" ]]; then
+        print_status "Cleaning node_modules (image clean requested)..."
+        rm -rf src/node_modules 2>/dev/null || true
     fi
     
-    # Clean up vendor directory for truly fresh install
+    # Clean up vendor directory for truly fresh install (force)
     if [[ $FRESH_INSTALL == "1" ]]; then
-        print_status "Cleaning up vendor directory..."
-        
-        # Try to remove with sudo if regular rm fails
-        if ! rm -rf src/vendor 2>/dev/null; then
-            print_status "Using sudo to clean vendor directory..."
-            sudo rm -rf src/vendor 2>/dev/null || true
-        fi
-        
-        rm -rf src/composer.lock 2>/dev/null || sudo rm -rf src/composer.lock 2>/dev/null || true
-        
-        # Also clean up composer cache to prevent corruption
+        print_status "Force removing vendor and composer.lock..."
+        rm -rf src/vendor 2>/dev/null || sudo rm -rf src/vendor 2>/dev/null || true
+        rm -f src/composer.lock 2>/dev/null || sudo rm -f src/composer.lock 2>/dev/null || true
         print_status "Clearing Composer cache..."
         docker-compose run --rm composer clear-cache 2>/dev/null || true
     fi
@@ -210,29 +207,44 @@ install_php_dependencies() {
     fi
     
     # Try composer install with error handling
-    print_status "Running composer install..."
+    print_status "Running composer install (no scripts first)..."
     
-    # First try without optimize-autoloader to avoid scanning issues
-    if ! docker-compose run --rm composer install --no-autoloader --no-interaction; then
-        print_warning "Composer install failed, trying with production dependencies only..."
-        
-        # Clean up and try without dev dependencies
-        rm -rf src/vendor 2>/dev/null || true
+    # Install dependencies without running scripts to avoid artisan before autoload ready
+    if ! docker-compose run --rm composer install --no-scripts --no-interaction --prefer-dist; then
+        print_warning "First composer install failed, retrying after cache clear..."
         docker-compose run --rm composer clear-cache 2>/dev/null || true
-        
-        if docker-compose run --rm composer install --no-dev --no-autoloader --no-interaction; then
-            print_status "Installing dev dependencies separately..."
-            docker-compose run --rm composer install --no-autoloader --no-interaction || {
-                print_warning "Dev dependencies failed to install, continuing with production dependencies only"
-            }
-        else
-            print_error "Composer dependencies installation failed completely"
+        docker-compose run --rm composer install --no-scripts --no-interaction --prefer-dist || {
+            print_error "Composer install failed even after retry"
             exit 1
-        fi
+        }
+    fi
+
+    # Generate autoloader now
+    print_status "Generating optimized autoloader (without scripts)..."
+    if ! docker-compose run --rm composer dump-autoload -o --no-scripts; then
+        print_warning "Standard autoload dump failed, attempting classmap-authoritative"
+        docker-compose run --rm composer dump-autoload -o --classmap-authoritative --no-scripts || print_warning "Could not fully optimize autoloader"
+    fi
+
+    # Now run framework discovery scripts manually in safe order
+    print_status "Running artisan package:discover..."
+    docker-compose run --rm artisan package:discover || print_warning "package:discover failed (continuing)"
+    
+    # Publish laravel assets only after autoload exists
+    if grep -q "laravel-assets" src/composer.json 2>/dev/null; then
+        print_status "Publishing laravel assets..."
+        docker-compose run --rm artisan vendor:publish --tag=laravel-assets --force || print_warning "Asset publish failed"
+    fi
+    
+    # Run key:generate if APP_KEY empty
+    if ! grep -q "^APP_KEY=.*" src/.env 2>/dev/null; then
+        print_status "Generating app key (post composer)..."
+        docker-compose run --rm artisan key:generate || print_warning "key:generate failed"
     fi
     
     # Generate autoloader in a separate step after all packages are installed
-    print_status "Generating autoloader..."
+    # Legacy manual autoloader creation section removed (no longer needed with above flow)
+    print_status "Verifying autoloader presence..."
     
     # Try the simplest autoloader generation first - just skip scripts to avoid issues
     if ! docker-compose run --rm composer dump-autoload --no-scripts 2>/dev/null; then
@@ -332,10 +344,15 @@ return true;
     
     # Final check - make sure we have some form of autoloader
     if docker-compose run --rm php test -f "/var/www/html/vendor/autoload.php" 2>/dev/null; then
+        # Adjust permissions so host user can edit generated files
+        HOST_UID=$(id -u)
+        HOST_GID=$(id -g)
+        print_status "Adjusting vendor file permissions for host editing..."
+        docker-compose run --rm php sh -c "addgroup -g $HOST_GID hostgrp 2>/dev/null || true; adduser -D -u $HOST_UID -G hostgrp hostusr 2>/dev/null || true; chown -R $HOST_UID:$HOST_GID /var/www/html/vendor" 2>/dev/null || true
         print_success "PHP dependencies installed"
     else
-        print_warning "Autoloader file missing but installation may still work"
-        print_success "PHP dependencies installed (packages available)"
+        print_error "Autoloader still missing; composer install incomplete"
+        exit 1
     fi
 }
 
@@ -361,12 +378,21 @@ install_node_dependencies() {
         sleep 10
     fi
     
-    # Run npm install
-    docker-compose run --rm npm install
-    
+    # Primary install attempt
+    if ! docker-compose run --rm npm install; then
+        print_warning "npm install failed - retrying with --legacy-peer-deps"
+        docker-compose run --rm npm install --legacy-peer-deps || {
+            print_warning "Retry with --legacy-peer-deps failed - trying --force"
+            docker-compose run --rm npm install --force || {
+                print_error "All npm install strategies failed"
+                exit 1
+            }
+        }
+    fi
+
     # Verify installation was successful
     if ! docker-compose run --rm npm list >/dev/null 2>&1; then
-        print_warning "Node.js dependencies verification failed (this may be normal)"
+        print_warning "Node dependency tree check returned non-zero (may be acceptable with peer overrides)"
     fi
     
     print_success "Node.js dependencies installed"
@@ -411,9 +437,11 @@ EOF
         fi
     fi
     
-    # Generate application key
-    print_status "Generating application key..."
-    docker-compose run --rm artisan key:generate --force
+    # Generate application key (skip if already set)
+    if ! grep -q "^APP_KEY=base64" src/.env 2>/dev/null; then
+        print_status "Generating application key..."
+        docker-compose run --rm artisan key:generate --force || print_warning "key:generate failed (may already exist)"
+    fi
     
     # Wait for database to be ready
     print_status "Waiting for database to be ready..."
@@ -484,14 +512,16 @@ fix_storage_permissions() {
         fi
         
         # Fix ownership and permissions
-        sudo chown -R $CURRENT_USER:$WEB_GROUP src/storage src/bootstrap/cache 2>/dev/null || {
-            print_warning "Could not change ownership with sudo, trying without..."
-            chown -R $CURRENT_USER:$CURRENT_USER src/storage src/bootstrap/cache 2>/dev/null || true
-        }
+        sudo chown -R $CURRENT_USER:$WEB_GROUP src/storage src/bootstrap/cache 2>/dev/null || chown -R $CURRENT_USER:$CURRENT_USER src/storage src/bootstrap/cache 2>/dev/null || true
         
-        chmod -R 775 src/storage src/bootstrap/cache 2>/dev/null || true
+        chmod -R ug+rwX src/storage src/bootstrap/cache 2>/dev/null || true
         find src/storage -type f -exec chmod 664 {} \; 2>/dev/null || true
         find src/bootstrap/cache -type f -exec chmod 664 {} \; 2>/dev/null || true
+        
+        # Ensure newly created files from container remain writable (set default ACL if available)
+        if command_exists setfacl; then
+            setfacl -R -m d:u:$CURRENT_USER:rwX -m d:g:$WEB_GROUP:rwX src/storage src/bootstrap/cache 2>/dev/null || true
+        fi
         
         # Special handling for log files
         if [ -f "src/storage/logs/laravel.log" ]; then
@@ -529,6 +559,60 @@ build_frontend() {
     print_success "Frontend assets built"
 }
 
+# Reset (drop & recreate) application databases on fresh install
+reset_database() {
+    if [[ $FRESH_INSTALL != 1 ]]; then
+        return 0
+    fi
+    print_status "Resetting databases (fresh install)..."
+
+    # Parse env if exists
+    DB_NAME="appdb"
+    DB_USER="user"
+    DB_PASS="secret"
+    TEST_DB_NAME="appdb_test"
+
+    if [ -f "src/.env" ]; then
+        # shellcheck disable=SC2046
+        DB_NAME=$(grep -E '^DB_DATABASE=' src/.env | head -n1 | cut -d'=' -f2 | tr -d '\r' || echo "$DB_NAME")
+        DB_USER=$(grep -E '^DB_USERNAME=' src/.env | head -n1 | cut -d'=' -f2 | tr -d '\r' || echo "$DB_USER")
+        DB_PASS=$(grep -E '^DB_PASSWORD=' src/.env | head -n1 | cut -d'=' -f2 | tr -d '\r' || echo "$DB_PASS")
+    fi
+
+    # Wait briefly for mysql responsiveness (reuse logic but lighter)
+    attempts=0
+    until docker-compose run --rm mysql mysql -hmysql -u$DB_USER -p$DB_PASS -e "SELECT 1" >/dev/null 2>&1 || [ $attempts -ge 20 ]; do
+        attempts=$((attempts+1))
+        sleep 2
+        print_status "Waiting for MySQL (reset) attempt $attempts/20"
+    done
+    if [ $attempts -ge 20 ]; then
+        print_warning "MySQL not reachable; skipping DB reset"
+        return 0
+    fi
+
+    # Perform drop & recreate using root if available, else app user
+    MYSQL_EXEC_PREFIX="docker-compose run --rm mysql mysql -hmysql"
+    # Try root first
+    if $MYSQL_EXEC_PREFIX -uroot -psecret -e "SELECT 1" >/dev/null 2>&1; then
+        SQL_PREFIX="-uroot -psecret"
+    else
+        SQL_PREFIX="-u$DB_USER -p$DB_PASS"
+    fi
+
+    print_status "Dropping database $DB_NAME (if exists)..."
+    $MYSQL_EXEC_PREFIX $SQL_PREFIX -e "DROP DATABASE IF EXISTS \`$DB_NAME\`;" || print_warning "Could not drop $DB_NAME"
+    print_status "Creating database $DB_NAME..."
+    $MYSQL_EXEC_PREFIX $SQL_PREFIX -e "CREATE DATABASE \`$DB_NAME\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" || print_error "Failed to create $DB_NAME"
+
+    print_status "Dropping test database $TEST_DB_NAME (if exists)..."
+    $MYSQL_EXEC_PREFIX $SQL_PREFIX -e "DROP DATABASE IF EXISTS \`$TEST_DB_NAME\`;" || true
+    print_status "Creating test database $TEST_DB_NAME..."
+    $MYSQL_EXEC_PREFIX $SQL_PREFIX -e "CREATE DATABASE \`$TEST_DB_NAME\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" || true
+
+    print_success "Databases reset"
+}
+
 # Run tests
 run_tests() {
     print_status "Running tests..."
@@ -540,11 +624,26 @@ run_tests() {
         return 0
     fi
     
-    # Ensure test database is ready
-    docker-compose run --rm artisan migrate --env=testing --force 2>/dev/null || {
-        print_warning "Could not run test migrations, skipping tests"
+    # Ensure database container is ready (simple retry loop)
+    print_status "Ensuring database is ready for tests..."
+    attempts=0
+    until docker-compose run --rm mysql mysql -hmysql -uuser -psecret -e "SELECT 1" >/dev/null 2>&1 || [ $attempts -ge 15 ]; do
+        attempts=$((attempts+1))
+        sleep 2
+        print_status "Waiting for MySQL (test phase) attempt $attempts/15"
+    done
+    if [ $attempts -ge 15 ]; then
+        print_warning "MySQL not ready for tests after retries; skipping test suite"
         return 0
-    }
+    fi
+    # Ensure testing database exists (Laravel default is same unless configured; create explicitly)
+    docker-compose run --rm mysql mysql -hmysql -uuser -psecret -e "CREATE DATABASE IF NOT EXISTS appdb_test;" >/dev/null 2>&1 || true
+    # Export DB_CONNECTION override if needed in future; migrations use --env=testing
+    print_status "Running test migrations..."
+    if ! docker-compose run --rm artisan migrate --env=testing --force; then
+        print_warning "Test migrations failed; skipping tests"
+        return 0
+    fi
     
     # Run PHPUnit tests
     docker-compose run --rm phpunit || {
@@ -577,8 +676,8 @@ health_check() {
         print_warning "Database connection test failed - this might be normal on first install"
     fi
     
-    # Test Redis connection (optional)
-    if docker-compose run --rm artisan tinker --execute="try { Redis::ping(); echo 'Redis connected successfully'; } catch(Exception \$e) { echo 'Redis connection failed (not critical)'; }" 2>/dev/null; then
+    # Test Redis connection (optional) using facade properly
+    if docker-compose run --rm artisan tinker --execute="try { \Illuminate\\Support\\Facades\\Redis::connection()->ping(); echo 'Redis connected successfully'; } catch(Exception \$e) { echo 'Redis connection failed (not critical)'; }" 2>/dev/null; then
         print_status "Redis connection: OK"
     else
         print_warning "Redis connection failed (not critical for basic functionality)"
@@ -714,6 +813,7 @@ main() {
     build_containers
     install_php_dependencies
     start_remaining_services
+    reset_database
     install_node_dependencies
     setup_laravel
     fix_storage_permissions

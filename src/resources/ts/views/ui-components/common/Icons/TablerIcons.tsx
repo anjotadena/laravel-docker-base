@@ -2,7 +2,7 @@ import IconWrapper from './IconWrapper';
 import {
   TbBrandTabler,
   TbBrandSvelte,
-  Tb2Fa,
+  TbAuth2Fa,
   TbAward,
   TbBatteryCharging2,
   TbBuildingChurch,
@@ -14,7 +14,7 @@ import {
 const renderIcon = [
   { render: () => <TbBrandTabler /> },
   { render: () => <TbBrandSvelte /> },
-  { render: () => <Tb2Fa /> },
+  { render: () => <TbAuth2Fa /> },
   { render: () => <TbAward /> },
   { render: () => <TbBatteryCharging2 /> },
   { render: () => <TbBuildingChurch /> },
