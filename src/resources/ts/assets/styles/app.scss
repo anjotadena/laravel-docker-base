@@ -2,9 +2,11 @@
 // @tailwind components;
 // @tailwind utilities;
 
+/* External CSS import should load first */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap");
-@import "./components/index.scss";
-@import "./template/index.scss";
-@import "./vendors/index.scss";
-@import "./tailwind/index.scss";
-@import "./docs/index.scss";
+
+@use "./components/index.scss" as *;
+@use "./template/index.scss" as *;
+@use "./vendors/index.scss" as *;
+@use "./tailwind/index.scss" as *;
+@use "./docs/index.scss" as *;
