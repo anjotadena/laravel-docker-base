@@ -83,9 +83,6 @@ cleanup_containers() {
     if [[ $FRESH_INSTALL == "1" ]]; then
         print_status "Force removing node_modules and lock files..."
         rm -rf src/node_modules 2>/dev/null || true
-        rm -f src/package-lock.json 2>/dev/null || true
-        rm -f src/pnpm-lock.yaml 2>/dev/null || true
-        rm -f src/yarn.lock 2>/dev/null || true
     elif [[ $CLEAN_IMAGES == "1" ]]; then
         print_status "Cleaning node_modules (image clean requested)..."
         rm -rf src/node_modules 2>/dev/null || true
@@ -93,9 +90,8 @@ cleanup_containers() {
     
     # Clean up vendor directory for truly fresh install (force)
     if [[ $FRESH_INSTALL == "1" ]]; then
-        print_status "Force removing vendor and composer.lock..."
+        print_status "Force removing vendor directory..."
         rm -rf src/vendor 2>/dev/null || sudo rm -rf src/vendor 2>/dev/null || true
-        rm -f src/composer.lock 2>/dev/null || sudo rm -f src/composer.lock 2>/dev/null || true
         print_status "Clearing Composer cache..."
         docker-compose run --rm composer clear-cache 2>/dev/null || true
     fi
@@ -191,7 +187,7 @@ install_php_dependencies() {
     fi
     
     # For fresh installs or if vendor is corrupted, remove it completely first
-    if [[ $FRESH_INSTALL == "1" ]] || [ ! -d "src/vendor" ] || [ ! -f "src/composer.lock" ]; then
+    if [[ $FRESH_INSTALL == "1" ]] || [ ! -d "src/vendor" ]; then
         print_status "Cleaning vendor directory before fresh install..."
         
         # Clean with proper permissions
@@ -199,8 +195,6 @@ install_php_dependencies() {
             print_status "Using sudo to clean vendor directory..."
             sudo rm -rf src/vendor 2>/dev/null || true
         fi
-        
-        rm -rf src/composer.lock 2>/dev/null || sudo rm -rf src/composer.lock 2>/dev/null || true
         
         # Clear composer cache to prevent corruption
         docker-compose run --rm composer clear-cache 2>/dev/null || true
@@ -442,24 +436,43 @@ EOF
         print_status "Generating application key..."
         docker-compose run --rm artisan key:generate --force || print_warning "key:generate failed (may already exist)"
     fi
-    
-    # Wait for database to be ready
+
+    # Parse DB connection from .env with sensible defaults
+    DB_HOST="mysql"
+    DB_PORT="3306"
+    DB_NAME="appdb"
+    DB_USER="user"
+    DB_PASS="secret"
+    if [ -f "src/.env" ]; then
+        DB_HOST=$(grep -E '^DB_HOST=' src/.env | head -n1 | cut -d'=' -f2 | tr -d '\r' || echo "$DB_HOST")
+        DB_PORT=$(grep -E '^DB_PORT=' src/.env | head -n1 | cut -d'=' -f2 | tr -d '\r' || echo "$DB_PORT")
+        DB_NAME=$(grep -E '^DB_DATABASE=' src/.env | head -n1 | cut -d'=' -f2 | tr -d '\r' || echo "$DB_NAME")
+        DB_USER=$(grep -E '^DB_USERNAME=' src/.env | head -n1 | cut -d'=' -f2 | tr -d '\r' || echo "$DB_USER")
+        DB_PASS=$(grep -E '^DB_PASSWORD=' src/.env | head -n1 | cut -d'=' -f2 | tr -d '\r' || echo "$DB_PASS")
+    fi
+
+    # Wait for database to be ready using direct MySQL ping
     print_status "Waiting for database to be ready..."
     max_attempts=30
     attempt=1
     while [ $attempt -le $max_attempts ]; do
-        if docker-compose run --rm artisan migrate:status >/dev/null 2>&1; then
+        if docker-compose run --rm mysql mysql -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" -p"$DB_PASS" -e "SELECT 1" >/dev/null 2>&1; then
             break
         fi
         print_status "Waiting for database... (attempt $attempt/$max_attempts)"
         sleep 2
         attempt=$((attempt + 1))
     done
-    
+
     if [ $attempt -gt $max_attempts ]; then
         print_error "Database connection failed after $max_attempts attempts"
+        print_status "Recent MySQL logs (last 100 lines):"
+        docker-compose logs --tail=100 mysql || true
         exit 1
     fi
+
+    # Ensure the target database exists (safe if already exists)
+    docker-compose run --rm mysql mysql -h"$DB_HOST" -P"$DB_PORT" -u"$DB_USER" -p"$DB_PASS" -e "CREATE DATABASE IF NOT EXISTS \`$DB_NAME\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" >/dev/null 2>&1 || true
     
     # Run database migrations
     print_status "Running database migrations..."
@@ -624,25 +637,69 @@ run_tests() {
         return 0
     fi
     
-    # Ensure database container is ready (simple retry loop)
-    print_status "Ensuring database is ready for tests..."
-    attempts=0
-    until docker-compose run --rm mysql mysql -hmysql -uuser -psecret -e "SELECT 1" >/dev/null 2>&1 || [ $attempts -ge 15 ]; do
-        attempts=$((attempts+1))
-        sleep 2
-        print_status "Waiting for MySQL (test phase) attempt $attempts/15"
-    done
-    if [ $attempts -ge 15 ]; then
-        print_warning "MySQL not ready for tests after retries; skipping test suite"
-        return 0
-    fi
-    # Ensure testing database exists (Laravel default is same unless configured; create explicitly)
-    docker-compose run --rm mysql mysql -hmysql -uuser -psecret -e "CREATE DATABASE IF NOT EXISTS appdb_test;" >/dev/null 2>&1 || true
-    # Export DB_CONNECTION override if needed in future; migrations use --env=testing
-    print_status "Running test migrations..."
-    if ! docker-compose run --rm artisan migrate --env=testing --force; then
-        print_warning "Test migrations failed; skipping tests"
-        return 0
+    # Detect phpunit DB configuration; if sqlite memory is used, skip DB migrations
+    if grep -q 'env name="DB_CONNECTION" value="sqlite"' src/phpunit.xml 2>/dev/null && \
+       grep -q 'env name="DB_DATABASE" value=":memory:"' src/phpunit.xml 2>/dev/null; then
+        print_status "PHPUnit configured for sqlite :memory:; skipping DB migrations"
+    else
+        # Ensure .env.testing exists with sane defaults if not using sqlite memory
+        if [ ! -f "src/.env.testing" ]; then
+            print_status "Creating src/.env.testing for MySQL test database..."
+            APP_KEY_VAL=$(grep -E '^APP_KEY=' src/.env | head -n1 | cut -d'=' -f2 | tr -d '\r')
+            cat > src/.env.testing << EOF
+APP_ENV=testing
+APP_KEY=${APP_KEY_VAL}
+APP_DEBUG=true
+
+DB_CONNECTION=mysql
+DB_HOST=mysql
+DB_PORT=3306
+DB_DATABASE=appdb_test
+DB_USERNAME=user
+DB_PASSWORD=secret
+
+CACHE_DRIVER=array
+QUEUE_CONNECTION=sync
+SESSION_DRIVER=array
+EOF
+        fi
+
+        # Parse DB settings from .env.testing (fallback to .env)
+        T_DB_HOST="mysql"
+        T_DB_PORT="3306"
+        T_DB_NAME="appdb_test"
+        T_DB_USER="user"
+        T_DB_PASS="secret"
+        if [ -f "src/.env.testing" ]; then
+            T_DB_HOST=$(grep -E '^DB_HOST=' src/.env.testing | head -n1 | cut -d'=' -f2 | tr -d '\r' || echo "$T_DB_HOST")
+            T_DB_PORT=$(grep -E '^DB_PORT=' src/.env.testing | head -n1 | cut -d'=' -f2 | tr -d '\r' || echo "$T_DB_PORT")
+            T_DB_NAME=$(grep -E '^DB_DATABASE=' src/.env.testing | head -n1 | cut -d'=' -f2 | tr -d '\r' || echo "$T_DB_NAME")
+            T_DB_USER=$(grep -E '^DB_USERNAME=' src/.env.testing | head -n1 | cut -d'=' -f2 | tr -d '\r' || echo "$T_DB_USER")
+            T_DB_PASS=$(grep -E '^DB_PASSWORD=' src/.env.testing | head -n1 | cut -d'=' -f2 | tr -d '\r' || echo "$T_DB_PASS")
+        fi
+
+        # Ensure database container is ready for tests
+        print_status "Ensuring database is ready for tests..."
+        attempts=0
+        until docker-compose run --rm mysql mysql -h"$T_DB_HOST" -P"$T_DB_PORT" -u"$T_DB_USER" -p"$T_DB_PASS" -e "SELECT 1" >/dev/null 2>&1 || [ $attempts -ge 15 ]; do
+            attempts=$((attempts+1))
+            sleep 2
+            print_status "Waiting for MySQL (test phase) attempt $attempts/15"
+        done
+        if [ $attempts -ge 15 ]; then
+            print_warning "MySQL not ready for tests after retries; skipping test suite"
+            return 0
+        fi
+
+        # Ensure testing database exists
+        docker-compose run --rm mysql mysql -h"$T_DB_HOST" -P"$T_DB_PORT" -u"$T_DB_USER" -p"$T_DB_PASS" -e "CREATE DATABASE IF NOT EXISTS \`$T_DB_NAME\`;" >/dev/null 2>&1 || true
+
+        # Run migrations against testing environment
+        print_status "Running test migrations..."
+        if ! docker-compose run --rm artisan migrate --env=testing --force; then
+            print_warning "Test migrations failed; skipping tests"
+            return 0
+        fi
     fi
     
     # Run PHPUnit tests

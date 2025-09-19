@@ -31,7 +31,7 @@
             <directory>./app/Providers</directory>
         </exclude>
     </coverage>
-   
+
     <php>
         <env name="APP_ENV" value="testing"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
@@ -44,3 +44,4 @@
         <env name="TELESCOPE_ENABLED" value="false"/>
     </php>
 </phpunit>
+(node:1) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 close listeners added to [TLSSocket]. Use emitter.setMaxListeners() to increase limit
