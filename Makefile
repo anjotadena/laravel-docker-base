@@ -58,8 +58,18 @@ quick: ## Quick setup (skip tests and frontend build)
 	@./install.sh --skip-tests --skip-build
 
 # Container management
-start: ## Start all containers
-	@echo "${GREEN}Starting containers...${RESET}"
+start: ## Start all containers with Vite watch mode
+	@echo "${GREEN}Starting containers with Vite development server...${RESET}"
+	@docker-compose up -d php mysql nginx redis
+	@echo "${GREEN}Starting Vite development server with watch mode...${RESET}"
+	@docker-compose --profile dev up npm-dev
+
+start-bg: ## Start all containers with Vite watch mode in background
+	@echo "${GREEN}Starting containers with Vite development server in background...${RESET}"
+	@docker-compose --profile dev up -d
+
+start-basic: ## Start all containers without Vite watch mode
+	@echo "${GREEN}Starting containers only (no Vite watch)...${RESET}"
 	@docker-compose up -d
 
 stop: ## Stop all containers

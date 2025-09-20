@@ -2,8 +2,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "cross-env SASS_SILENCE_DEPRECATIONS=legacy-js-api vite --host",
-    "dev:watch": "cross-env SASS_SILENCE_DEPRECATIONS=legacy-js-api vite --host --watch",
+    "dev": "cross-env SASS_SILENCE_DEPRECATIONS=legacy-js-api vite --host 0.0.0.0 --port 5173",
+    "dev:watch": "cross-env SASS_SILENCE_DEPRECATIONS=legacy-js-api vite --host 0.0.0.0 --port 5173 --watch",
     "build": "cross-env SASS_SILENCE_DEPRECATIONS=legacy-js-api tsc && vite build",
     "production": "npm run build && ./serve-prod.sh"
   },
