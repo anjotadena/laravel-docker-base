@@ -28,32 +28,39 @@ make install
 ### Start Development
 
 ```bash
-# Start all services
-make dev
+# Start all services with Vite watch mode (recommended)
+make start
 
-# Or manually
-docker-compose up -d
+# Start in background with watch mode
+make start-bg
+
+# Start without Vite watch mode
+make start-basic
+
+# Alternative development mode
+make dev
 ```
 
 Your application will be available at:
-- **Frontend**: http://localhost
+- **Frontend**: http://localhost (Laravel)
+- **Vite Dev Server**: http://localhost:5173 (with HMR)
 - **API Documentation**: http://localhost/api/documentation  
 - **Database Admin**: http://localhost:8080 (Adminer)
 
 ## 🛠 Technology Stack
 
 - **Backend**: Laravel 10 with PHP 8.1+
-- **Frontend**: React 18 with TypeScript
+- **Frontend**: React 18.2.0 with TypeScript
 - **Database**: MySQL 8.0
 - **Caching**: Redis
 - **Web Server**: Nginx
-- **Build Tools**: Vite
+- **Build Tools**: Vite with HMR
 - **Containerization**: Docker & Docker Compose
 
 ## ✨ Features
 
 - 🔐 API authentication with Sanctum
-- ⚡ Hot module replacement with Vite
+- ⚡ Hot module replacement with Vite watch mode
 - 🎨 Tailwind CSS for styling
 - 🧪 PHPUnit testing setup
 - 📊 API documentation with Swagger
@@ -61,6 +68,8 @@ Your application will be available at:
 - 🐳 Complete Docker environment
 - 🛡️ Automated permission fixes
 - 📦 Automated dependency management
+- 🔧 React 18 with full TypeScript support
+- 🎯 Drag & Drop with react-beautiful-dnd
 
 ## 📋 Available Commands
 
@@ -74,9 +83,11 @@ make quick         # Quick setup (skip tests & build)
 
 ### Development
 ```bash
-make dev           # Start development mode (with Vite)
-make dev-bg        # Start in background
-make start         # Start containers
+make start         # Start containers with Vite watch mode
+make start-bg      # Start with Vite watch mode (background)
+make start-basic   # Start containers only (no Vite watch)
+make dev           # Alternative development mode
+make dev-bg        # Start dev mode in background
 make stop          # Stop containers  
 make restart       # Restart containers
 make status        # Show container status
@@ -123,7 +134,8 @@ make queue         # Start queue worker
 | **php** | ldb-php | 9000 | PHP-FPM application server |
 | **mysql** | ldb-mysql | 3306 | Database server |
 | **redis** | ldb-redis | 6379 | Cache & session store |
-| **npm** | ldb-npm | 5173 | Node.js & Vite dev server |
+| **npm-dev** | ldb-npm-dev | 5173 | Vite dev server with HMR |
+| **npm** | ldb-npm | - | Node.js for running commands |
 | **adminer** | ldb-adminer | 8080 | Database management UI |
 
 ## 📁 Project Structure
@@ -162,25 +174,36 @@ make install
 
 ### 2. Daily Development
 ```bash
-# Start development environment
-make dev
+# Start development environment with Vite watch mode
+make start
 
 # In another terminal, make changes and run commands:
 make artisan cmd="make:controller ApiController"
 make migrate
 make test
+
+# Frontend changes will automatically reload via HMR
 ```
 
 ### 3. Frontend Development
 ```bash
-# Start Vite dev server (with hot reload)
-make dev
+# Start Vite dev server with watch mode and HMR
+make start
 
 # Build for production
 make build
 
+# Watch for changes (alternative)
+make watch
+
 # Install new npm packages
 make npm cmd="install axios"
+
+# The Vite dev server provides:
+# - Hot Module Replacement (HMR) for instant updates
+# - React 18 support with full TypeScript
+# - Automatic SASS compilation
+# - File watching with Docker optimization
 ```
 
 ### 4. Database Management
@@ -198,7 +221,48 @@ make seed
 # Server: mysql, User: user, Password: secret, Database: appdb
 ```
 
-## 🔧 Configuration
+## � Vite Watch Mode & HMR
+
+This project includes an advanced Vite development setup with Hot Module Replacement (HMR) for an optimal development experience.
+
+### Watch Mode Commands
+
+```bash
+# Primary development command (recommended)
+make start          # Starts containers + Vite dev server with HMR
+
+# Background development
+make start-bg       # Same as above but runs in background
+
+# Containers only (no frontend watching)
+make start-basic    # Just Laravel containers, no Vite
+
+# Legacy development mode
+make dev           # Alternative development setup
+```
+
+### Features
+
+- **🔄 Hot Module Replacement**: Changes to React/TypeScript files are instantly reflected in the browser
+- **📁 File Watching**: Automatic detection of file changes using optimized polling for Docker
+- **⚡ Fast Builds**: Vite's lightning-fast bundling with React 18 support
+- **🎨 SASS Processing**: Automatic compilation of SASS files with proper @use rule ordering
+- **🐳 Docker Optimized**: Configured specifically for containerized development
+
+### Development Workflow
+
+1. **Start watching**: `make start`
+2. **Edit files**: Make changes to any `.tsx`, `.ts`, `.scss`, or `.css` files
+3. **Instant feedback**: See changes immediately in your browser at `http://localhost:5173`
+4. **Laravel integration**: Backend changes require container restart, frontend changes don't
+
+### Ports
+
+- **Laravel App**: http://localhost (via Nginx)
+- **Vite Dev Server**: http://localhost:5173 (with HMR)
+- **Database Admin**: http://localhost:8080
+
+## �🔧 Configuration
 
 ### Environment Variables
 Copy `src/.env.example` to `src/.env` and modify as needed:
@@ -267,6 +331,26 @@ make npm-install
 
 # Rebuild assets
 make build
+
+# Restart Vite dev server
+make stop
+make start
+
+# Check Vite logs
+docker logs ldb-npm-dev
+```
+
+### Watch Mode Not Working
+```bash
+# Ensure containers are running properly
+make status
+
+# Check if port 5173 is available
+docker ps | grep 5173
+
+# Restart with clean slate
+make stop
+make start
 ```
 
 ## 🧪 Testing
@@ -346,7 +430,43 @@ For issues, questions, or contributions:
 - **Email**: [tadena.anjo@gmail.com](mailto:tadena.anjo@gmail.com)
 - **LinkedIn**: [Connect with me](https://www.linkedin.com/in/73ch801/)
 
-## 📚 Additional Resources
+## � Current Package Versions
+
+### Core Dependencies
+- **React**: 18.2.0
+- **React DOM**: 18.2.0
+- **TypeScript**: 5.4.5
+- **Vite**: 5.2.8
+- **Laravel Vite Plugin**: 1.0.2
+
+### Key Frontend Libraries
+- **UI Components**: react-beautiful-dnd (13.1.1), react-select (5.8.0)
+- **State Management**: @reduxjs/toolkit (2.2.3), react-redux (9.1.0)
+- **Routing**: react-router-dom (6.22.3)
+- **Styling**: tailwindcss (3.4.3), styled-components (6.1.8)
+- **Forms**: formik (2.4.5), yup (1.4.0)
+- **Charts**: apexcharts (4.0.0), react-apexcharts (1.7.0)
+
+### React 19 Upgrade Path
+If you want to upgrade to React 19, you'll need to:
+
+```bash
+# Update React and React DOM
+make npm cmd="install react@19 react-dom@19"
+
+# Replace react-beautiful-dnd with @hello-pangea/dnd (React 19 compatible)
+make npm cmd="uninstall react-beautiful-dnd @types/react-beautiful-dnd"
+make npm cmd="install @hello-pangea/dnd@18.0.1"
+
+# Update TypeScript types
+make npm cmd="install --save-dev @types/react@19 @types/react-dom@19"
+
+# Rebuild and test
+make build
+make test
+```
+
+## �📚 Additional Resources
 
 - [Laravel Documentation](https://laravel.com/docs)
 - [React Documentation](https://react.dev/)
