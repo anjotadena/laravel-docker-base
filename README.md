@@ -240,6 +240,19 @@ laravel-docker-base/
 │   └── npm/               # Node.js configuration
 ├── src/                   # Laravel application
 │   ├── app/               # Laravel app code
+│   │   ├── Domains/       # 🏗️ Domain-Driven Design structure
+│   │   │   ├── Auth/      # Authentication domain
+│   │   │   │   ├── Controllers/
+│   │   │   │   ├── Services/
+│   │   │   │   ├── DTOs/
+│   │   │   │   └── Requests/
+│   │   │   └── User/      # User management domain
+│   │   │       ├── Controllers/
+│   │   │       └── Services/
+│   │   ├── Shared/        # Shared components across domains
+│   │   │   ├── Http/      # HTTP responses, middleware
+│   │   │   └── Exceptions/# Custom exceptions
+│   │   └── Models/        # Eloquent models
 │   ├── resources/         # Views, assets, lang
 │   │   ├── ts/           # TypeScript/React code
 │   │   └── css/          # Stylesheets
@@ -253,7 +266,90 @@ laravel-docker-base/
 └── README.md
 ```
 
-## 🚀 Development Workflow
+## � API Endpoints
+
+Our API follows Domain-Driven Design (DDD) architecture with Laravel Sanctum authentication.
+
+### Authentication Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/api/v1/auth/register` | Register new user | No |
+| POST | `/api/v1/auth/login` | Login user | No |
+| POST | `/api/v1/auth/logout` | Logout user | Yes |
+| GET | `/api/v1/auth/me` | Get current user | Yes |
+| POST | `/api/v1/auth/refresh` | Refresh token | Yes |
+
+### User Management Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/api/v1/users` | Get all users | Yes |
+| GET | `/api/v1/users/search?q={query}` | Search users | Yes |
+| GET | `/api/v1/users/{id}` | Get user by ID | Yes |
+| PUT | `/api/v1/users/{id}` | Update user | Yes |
+| DELETE | `/api/v1/users/{id}` | Delete user | Yes |
+
+### API Usage Examples
+
+#### Register a new user
+```bash
+curl -X POST https://localhost/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "name": "John Doe",
+    "email": "john@example.com",
+    "password": "password123",
+    "password_confirmation": "password123"
+  }'
+```
+
+#### Login
+```bash
+curl -X POST https://localhost/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "email": "john@example.com",
+    "password": "password123"
+  }'
+```
+
+#### Access protected endpoints
+```bash
+curl -X GET https://localhost/api/v1/auth/me \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
+  -H "Accept: application/json"
+```
+
+### API Response Format
+
+All API responses follow a consistent format:
+
+**Success Response:**
+```json
+{
+  "success": true,
+  "message": "Operation successful",
+  "data": {
+    // Response data here
+  }
+}
+```
+
+**Error Response:**
+```json
+{
+  "success": false,
+  "message": "Error message",
+  "errors": {
+    // Validation errors or additional error details
+  }
+}
+```
+
+## �🚀 Development Workflow
 
 ### 1. Initial Setup
 ```bash
