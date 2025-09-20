@@ -16,7 +16,7 @@ if (appConfig.enableMock) {
   mockServer({ environment });
 }
 // Generate unit test
-// 
+//
 const App = () => (
   <Provider store={store}>
     <PersistGate loading={null} persistor={persistor}>
