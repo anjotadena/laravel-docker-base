@@ -1,1 +1,3 @@
 /.mysqldata/*
+
+./src/storage/*
