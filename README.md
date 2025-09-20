@@ -1,5 +1,76 @@
 # Laravel Docker Workflow
-[![CircleCI](https://circleci.com/gh/anjotadena/laravel-docker-base/tree/master.svg?style=svg)](https://circleci.com/gh/anjotadena/laravel-docker-base/tree/master)[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![CircleCI](https://circleci.com/gh/anjotadena/laravel-docker-base/tree/master.svg?style=svg)](https://circleci.com/gh/anjotadena/laravel-docker-base/tree/master)[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://open## 🔥 Development vs Production Modes
+
+### 🛠 Development Mode (Watch Mode)
+**Use**Important**: You don't access port 5173 directly. Vite runs internally to compile assets that are served through your Laravel application on port 80.
+
+## 🔗 Laravel + Vite Integration
+
+This project uses Laravel's native Vite integration, meaning:
+
+### How Assets Are Served
+
+**Development Mode** (`make start`):
+1. Vite dev server runs on port 5173 (internal)
+2. Laravel views include `@vite` directives
+3. Assets are served through Laravel on port 80 with HMR
+4. You work with your app at `http://localhost`
+
+**Production Mode** (`make build` + `make start-basic`):
+1. Vite builds optimized assets to `public/build/`
+2. Laravel serves static assets directly
+3. No dev server needed, just optimized bundles
+
+### Laravel Blade Integration
+
+Your Laravel views should include:
+```blade
+@vite(['resources/ts/main.tsx', 'resources/ts/index.scss'])
+```
+
+This automatically:
+- ✅ Loads HMR scripts in development
+- ✅ Loads optimized bundles in production
+- ✅ Handles asset versioning and caching
+
+## 🔧 Configurationr active development work**
+
+```bash
+make start          # ✅ RECOMMENDED: Vite watch mode with HMR
+make start-bg       # Same as above but runs in background
+make dev           # Alternative development setup
+```
+
+**Features:**
+- 🔄 Hot Module Replacement (HMR)
+- 📁 File watching and auto-compilation
+- 🚀 Fast rebuilds and instant updates
+- 🐛 Source maps for debugging
+
+### 📦 Production Mode (Build Mode)
+**Use for production deployment**
+
+```bash
+make build          # ✅ Build optimized assets
+make start-basic    # Start containers (no watch mode)
+make deploy-build   # Complete production setup
+```
+
+**Features:**
+- 🗜️ Minified and optimized bundles
+- 🌳 Tree-shaking removes unused code
+- 📈 Performance optimizations
+- 🎯 Asset versioning and caching
+
+### Quick Reference
+
+| Task | Development | Production |
+|------|-------------|------------|
+| **Start Environment** | `make start` | `make build` → `make start-basic` |
+| **Asset Processing** | Watch mode (HMR) | Build mode (optimized) |
+| **File Changes** | Instant updates | Manual rebuild required |
+| **Performance** | Development optimized | Production optimized |
+| **Debugging** | Source maps enabled | Minified code |/MIT)
 
 A complete Docker-based development environment for Laravel with React/TypeScript frontend. This setup provides a robust, scalable, and easy-to-use development workflow.
 
@@ -25,27 +96,35 @@ chmod +x install.sh
 make install
 ```
 
-### Start Development
+### Development Environment
 
 ```bash
-# Start all services with Vite watch mode (recommended)
+# Start development with Vite watch mode (RECOMMENDED for development)
 make start
 
 # Start in background with watch mode
 make start-bg
 
-# Start without Vite watch mode
-make start-basic
-
 # Alternative development mode
 make dev
 ```
 
+### Production Environment
+
+```bash
+# Build optimized assets for production
+make build
+
+# Start containers without watch mode (for production)
+make start-basic
+```
+
 Your application will be available at:
-- **Frontend**: http://localhost (Laravel)
-- **Vite Dev Server**: http://localhost:5173 (with HMR)
+- **Main Application**: http://localhost (Laravel views with compiled assets)
 - **API Documentation**: http://localhost/api/documentation  
 - **Database Admin**: http://localhost:8080 (Adminer)
+
+**Note**: Port 5173 is used internally by Vite for asset compilation and HMR. Your main application runs on port 80 through Laravel.
 
 ## 🛠 Technology Stack
 
@@ -81,14 +160,24 @@ make fresh         # Clean install (removes all data)
 make quick         # Quick setup (skip tests & build)
 ```
 
-### Development
+### Development (Watch Mode)
 ```bash
-make start         # Start containers with Vite watch mode
-make start-bg      # Start with Vite watch mode (background)
-make start-basic   # Start containers only (no Vite watch)
+make start         # 🔥 Start with Vite watch mode (RECOMMENDED)
+make start-bg      # Start with watch mode (background)
 make dev           # Alternative development mode
-make dev-bg        # Start dev mode in background
-make stop          # Stop containers  
+make dev-bg        # Dev mode in background
+```
+
+### Production (Build Mode)
+```bash
+make build         # 📦 Build optimized assets for production
+make start-basic   # Start containers without watch mode
+make deploy-build  # Complete production build setup
+```
+
+### Container Management
+```bash
+make stop          # Stop all containers
 make restart       # Restart containers
 make status        # Show container status
 make logs          # Show all logs
@@ -130,13 +219,15 @@ make queue         # Start queue worker
 
 | Service | Container | Port | Purpose |
 |---------|-----------|------|---------|
-| **nginx** | ldb-nginx | 80, 443 | Web server & reverse proxy |
+| **nginx** | ldb-nginx | 80, 443 | Web server & reverse proxy (main app) |
 | **php** | ldb-php | 9000 | PHP-FPM application server |
 | **mysql** | ldb-mysql | 3306 | Database server |
 | **redis** | ldb-redis | 6379 | Cache & session store |
-| **npm-dev** | ldb-npm-dev | 5173 | Vite dev server with HMR |
+| **npm-dev** | ldb-npm-dev | 5173* | Vite asset compilation (internal) |
 | **npm** | ldb-npm | - | Node.js for running commands |
 | **adminer** | ldb-adminer | 8080 | Database management UI |
+
+*Port 5173 is used internally for asset compilation. Access your app at http://localhost (port 80)
 
 ## 📁 Project Structure
 
@@ -172,38 +263,68 @@ cd laravel-docker-base
 make install
 ```
 
-### 2. Daily Development
+### 2. Development Mode (Watch Mode)
+**Use this for active development work:**
+
 ```bash
 # Start development environment with Vite watch mode
 make start
 
-# In another terminal, make changes and run commands:
+# Your development environment provides:
+# ✅ Hot Module Replacement (HMR) for instant React updates
+# ✅ Automatic file watching and compilation
+# ✅ Live reload for all frontend changes
+# ✅ Source maps for debugging
+```
+
+**In another terminal, run Laravel commands:**
+```bash
 make artisan cmd="make:controller ApiController"
 make migrate
 make test
-
-# Frontend changes will automatically reload via HMR
 ```
 
-### 3. Frontend Development
-```bash
-# Start Vite dev server with watch mode and HMR
-make start
+### 3. Production Mode (Build Mode)
+**Use this for production deployment:**
 
-# Build for production
+```bash
+# Build optimized assets (minified, tree-shaken)
 make build
 
-# Watch for changes (alternative)
-make watch
+# Start containers without watch mode
+make start-basic
 
-# Install new npm packages
+# Your production build provides:
+# ✅ Minified and optimized JavaScript/CSS
+# ✅ Tree-shaking to remove unused code
+# ✅ Asset versioning and caching
+# ✅ Production-ready performance
+```
+
+### 4. Frontend Development Guidelines
+
+#### Development Commands
+```bash
+# Install new packages
 make npm cmd="install axios"
 
-# The Vite dev server provides:
-# - Hot Module Replacement (HMR) for instant updates
-# - React 18 support with full TypeScript
-# - Automatic SASS compilation
-# - File watching with Docker optimization
+# Development with watch mode (ALWAYS use for development)
+make start
+
+# Check for updates
+make npm cmd="audit"
+```
+
+#### Production Commands
+```bash
+# Build for production deployment
+make build
+
+# Test production build locally
+make start-basic
+
+# Deploy production assets
+make deploy-build
 ```
 
 ### 4. Database Management
@@ -253,14 +374,17 @@ make dev           # Alternative development setup
 
 1. **Start watching**: `make start`
 2. **Edit files**: Make changes to any `.tsx`, `.ts`, `.scss`, or `.css` files
-3. **Instant feedback**: See changes immediately in your browser at `http://localhost:5173`
-4. **Laravel integration**: Backend changes require container restart, frontend changes don't
+3. **Instant feedback**: See changes immediately in your browser at `http://localhost`
+4. **HMR integration**: Frontend changes are hot-reloaded through Laravel views
+5. **Backend changes**: Laravel changes require container restart
 
-### Ports
+### How It Works
 
-- **Laravel App**: http://localhost (via Nginx)
-- **Vite Dev Server**: http://localhost:5173 (with HMR)
+- **Main App**: http://localhost (Laravel serves views with compiled assets)
+- **Asset Pipeline**: Vite compiles and injects assets into Laravel views via HMR
 - **Database Admin**: http://localhost:8080
+
+**Important**: You don't access port 5173 directly. Vite runs internally to compile assets that are served through your Laravel application on port 80.
 
 ## �🔧 Configuration
 
@@ -322,35 +446,55 @@ make clean
 make fresh
 ```
 
-### Vite/Frontend Issues
+### Development Issues (Watch Mode)
 ```bash
-# Clear node modules and reinstall
+# Restart development environment
+make stop
+make start                    # Restarts with watch mode
+
+# Clear caches and rebuild
 make npm cmd="cache clean --force"
 rm -rf src/node_modules
 make npm-install
-
-# Rebuild assets
-make build
-
-# Restart Vite dev server
-make stop
 make start
 
-# Check Vite logs
+# Check Vite dev server logs (internal compilation)
 docker logs ldb-npm-dev
+
+# Check if HMR is working by visiting your Laravel app
+curl http://localhost
 ```
 
-### Watch Mode Not Working
+### Production Issues (Build Mode)
 ```bash
-# Ensure containers are running properly
-make status
+# Rebuild production assets
+make build                    # Create optimized bundles
 
-# Check if port 5173 is available
-docker ps | grep 5173
+# Clear all caches
+make deploy-clear            # Clear Laravel caches
+make npm cmd="cache clean --force"
 
-# Restart with clean slate
-make stop
-make start
+# Test production build locally
+make start-basic             # Start without watch mode
+
+# Check build output
+ls -la src/public/build/
+```
+
+### Common Issues
+
+#### "HMR not working" (Development)
+```bash
+# Ensure you're using development mode
+make start                   # ✅ Correct command
+# NOT: make start-basic      # ❌ This is for production
+```
+
+#### "Assets not updating" (Production)
+```bash
+# Rebuild assets after changes
+make build                   # ✅ Required for production
+make restart                 # Restart containers
 ```
 
 ## 🧪 Testing
@@ -379,19 +523,123 @@ make artisan cmd="make:test ApiTest"
 
 ## 📦 Deployment
 
-### Production Build
-```bash
-# Build optimized assets
-make deploy-build
+## 🔧 Recommended Development Steps
 
-# Use production docker-compose
-docker-compose -f docker-compose.prod.yml up -d
+### Daily Development Workflow
+```bash
+# 1. Start development environment
+make start                    # Starts containers + Vite watch mode
+
+# 2. Open your editor and start coding
+# - React/TypeScript files: Instant HMR updates via Laravel views
+# - SASS/CSS files: Automatic compilation
+# - Changes reflect immediately at http://localhost (main app)
+
+# 3. Run Laravel commands in another terminal
+make artisan cmd="make:model User -m"
+make migrate
+make test
+
+# 4. Install new packages when needed
+make npm cmd="install lodash"
+make composer cmd="require laravel/sanctum"
+
+# 5. Stop when done
+make stop
 ```
 
-### SSL/HTTPS
+### Frontend Development Best Practices
 ```bash
-# Renew SSL certificates (production)
-make ssl-renew
+# Always use watch mode for development
+make start                    # ✅ Correct for development
+
+# Never use build mode for development
+make build && make start-basic # ❌ Wrong for development (slow, no HMR)
+```
+
+## 🚀 Recommended Production Deployment
+
+### Production Deployment Checklist
+
+#### 1. Pre-deployment Preparation
+```bash
+# Build optimized assets
+make build                    # Creates minified, optimized bundles
+
+# Run tests
+make test                     # Ensure everything works
+
+# Check for security issues
+make npm cmd="audit --audit-level high"
+```
+
+#### 2. Production Environment Setup
+```bash
+# Use production docker-compose
+docker-compose -f docker-compose.prod.yml up -d
+
+# Or complete production build
+make deploy-build            # Includes:
+                            # - Composer install --no-dev
+                            # - npm run build
+                            # - Laravel cache optimization
+```
+
+#### 3. Production Optimization Commands
+```bash
+# Laravel optimizations
+make artisan cmd="config:cache"      # Cache configuration
+make artisan cmd="route:cache"       # Cache routes
+make artisan cmd="view:cache"        # Cache views
+make artisan cmd="optimize"          # General optimization
+
+# Database setup
+make migrate --env=production
+```
+
+#### 4. Production Monitoring
+```bash
+# Check production logs
+make logs-nginx              # Web server logs
+make logs-php               # Application logs
+
+# Monitor container health
+make status                 # Container status
+docker stats                # Resource usage
+```
+
+### Environment-Specific Commands
+
+#### Development Environment
+```bash
+# Start development (with watch mode)
+make start                  # Always use this for development
+
+# Clear development caches
+make artisan cmd="config:clear"
+make artisan cmd="route:clear"
+make artisan cmd="view:clear"
+```
+
+#### Production Environment
+```bash
+# Build and start production
+make build                  # Build optimized assets
+make start-basic           # Start without watch mode
+
+# Production caching
+make artisan cmd="config:cache"
+make artisan cmd="route:cache"
+make artisan cmd="view:cache"
+```
+
+### SSL/HTTPS (Production)
+```bash
+# Setup SSL certificates
+make ssl-renew             # Renew SSL certificates
+
+# Use HTTPS docker-compose
+docker-compose -f docker-compose.prod.yml up -d
 ```
 
 ## 🔍 Monitoring & Debugging
