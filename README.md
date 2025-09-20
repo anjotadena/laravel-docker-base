@@ -1,8 +1,8 @@
 # Laravel Docker Workflow
-[![CircleCI](https://circleci.com/gh/anjotadena/laravel-docker-base/tree/master.svg?style=svg)](https://circleci.com/gh/anjotadena/laravel-docker-base/tree/master)[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://open## 🔥 Development vs Production Modes
+[![CircleCI](https://circleci.com/gh/anjotadena/laravel-docker-base/tree/master.svg?style=svg)](https://circleci.com/gh/anjotadena/laravel-docker-base/tree/master) ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 ### 🛠 Development Mode (Watch Mode)
-**Use**Important**: You don't access port 5173 directly. Vite runs internally to compile assets that are served through your Laravel application on port 80.
+**Important**: You don't access port 5173 directly. Vite runs internally to compile assets that are served through your Laravel application on port 80.
 
 ## 🔗 Laravel + Vite Integration
 
