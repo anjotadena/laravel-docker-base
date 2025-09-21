@@ -1,64 +1,202 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+# Laravel DDD API
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A comprehensive REST API built with **Domain-Driven Design (DDD)** architecture using Laravel, featuring:
 
-## About Laravel
+- 🏗️ **Domain-Driven Design** architecture with clean separation of concerns
+- 🔐 **Laravel Sanctum** authentication with bearer token support
+- 📚 **Interactive API Documentation** powered by Laravel Scramble
+- 🧪 **HTTP Client Testing** files for easy endpoint testing
+- 🐳 **Docker** development environment ready
+- ✨ **Modern Laravel** with best practices
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🚀 Quick Start
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+1. **Start the Docker environment**:
+   ```bash
+   docker-compose up -d
+   ```
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+2. **Access the API Documentation**:
+   - Interactive Documentation: [https://localhost/api/docs](https://localhost/api/docs)
+   - OpenAPI JSON Spec: [https://localhost/docs/api.json](https://localhost/docs/api.json)
 
-## Learning Laravel
+3. **Test the API**:
+   - Use the provided `src/api.http` file with your HTTP client
+   - Try the interactive documentation's "Try It" feature
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 📖 API Documentation
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Interactive Documentation
+Visit [https://localhost/api/docs](https://localhost/api/docs) to access the comprehensive interactive API documentation powered by Laravel Scramble. The documentation includes:
 
-## Laravel Sponsors
+- **Complete endpoint reference** with request/response examples
+- **Interactive testing** - try endpoints directly from the browser
+- **Authentication support** - automatically handles bearer tokens
+- **Schema documentation** - detailed request and response structures
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+### Available Endpoints
 
-### Premium Partners
+#### Authentication
+- `POST /api/v1/auth/register` - User registration
+- `POST /api/v1/auth/login` - User login
+- `POST /api/v1/auth/logout` - User logout (requires authentication)
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+#### User Management
+- `GET /api/v1/users` - List all users (requires authentication)
+- `GET /api/v1/users/{id}` - Get specific user (requires authentication)
+- `PUT /api/v1/users/{id}` - Update user (requires authentication)
+- `DELETE /api/v1/users/{id}` - Delete user (requires authentication)
 
-## Contributing
+## 🧪 Testing with HTTP Files
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+The project includes a comprehensive HTTP testing file at `src/api.http` with:
 
-## Code of Conduct
+- Pre-configured environment variables
+- Complete endpoint coverage
+- Automatic token management
+- Manual token alternatives
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Setup for HTTP Testing
 
-## Security Vulnerabilities
+1. **Using REST Client extension in VS Code**:
+   - Install the "REST Client" extension
+   - Open `src/api.http`
+   - Configure environment in `http-client.env.json`
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+2. **Environment Configuration**:
+   ```json
+   {
+     "development": {
+       "baseUrl": "https://localhost",
+       "token": "your-bearer-token-here"
+     }
+   }
+   ```
 
-## License
+## 🔐 Authentication
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+The API uses **Laravel Sanctum** for authentication:
+
+1. **Register** or **Login** to receive a bearer token
+2. **Include the token** in subsequent requests:
+   ```
+   Authorization: Bearer your-token-here
+   ```
+3. **Token management** is handled automatically in the HTTP testing files
+
+## 🏗️ Architecture
+
+This project follows **Domain-Driven Design (DDD)** principles:
+
+```
+src/app/
+├── Domains/           # Business domains
+│   ├── Auth/         # Authentication domain
+│   └── User/         # User management domain
+├── Http/             # HTTP layer (controllers, requests, resources)
+├── Providers/        # Service providers
+└── Shared/           # Shared utilities and contracts
+```
+
+### Domain Structure
+Each domain contains:
+- **Models** - Eloquent models and business entities
+- **Services** - Business logic and use cases
+- **Repositories** - Data access patterns
+- **Events** - Domain events
+- **Policies** - Authorization logic
+
+## 🛠️ Development
+
+### Requirements
+- Docker & Docker Compose
+- PHP 8.1+ (for local development)
+- Composer (for dependency management)
+
+### Local Setup
+1. **Clone the repository**
+2. **Copy environment file**:
+   ```bash
+   cp .env.example .env
+   ```
+3. **Start Docker services**:
+   ```bash
+   docker-compose up -d
+   ```
+4. **Install dependencies**:
+   ```bash
+   docker exec -it ldb-php composer install
+   ```
+5. **Generate application key**:
+   ```bash
+   docker exec -it ldb-php php artisan key:generate
+   ```
+6. **Run migrations**:
+   ```bash
+   docker exec -it ldb-php php artisan migrate
+   ```
+
+### Available Services
+- **Web Application**: [https://localhost](https://localhost)
+- **API Documentation**: [https://localhost/api/docs](https://localhost/api/docs)
+- **Database (MySQL)**: `localhost:4306`
+- **Database Admin (Adminer)**: [http://localhost:8080](http://localhost:8080)
+- **Redis**: `localhost:6379`
+
+## 🧪 Testing
+
+### Running Tests
+```bash
+# Run all tests
+docker exec -it ldb-php php artisan test
+
+# Run specific test suite
+docker exec -it ldb-php php artisan test --testsuite=Feature
+
+# Run with coverage
+docker exec -it ldb-php php artisan test --coverage
+```
+
+### HTTP Client Testing
+Use the provided `src/api.http` file with:
+- **VS Code REST Client** extension
+- **JetBrains HTTP Client**
+- **Postman** (import the collection)
+
+## 📊 API Features
+
+- ✅ **RESTful Design** - Follows REST principles
+- ✅ **OpenAPI 3.1** - Complete specification generation  
+- ✅ **Interactive Docs** - Try endpoints in the browser
+- ✅ **Bearer Token Auth** - Secure authentication via Sanctum
+- ✅ **Request/Response Validation** - Comprehensive validation
+- ✅ **Error Handling** - Consistent error responses
+- ✅ **Rate Limiting** - Built-in API rate limiting
+- ✅ **CORS Support** - Cross-origin resource sharing
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+1. **SSL Certificate Warnings**:
+   - The development environment uses self-signed certificates
+   - Accept the security warning in your browser or use `-k` flag with curl
+
+2. **Documentation Not Loading**:
+   - Ensure Docker services are running: `docker-compose ps`
+   - Clear Laravel cache: `docker exec -it ldb-php php artisan cache:clear`
+   - Check route configuration: `docker exec -it ldb-php php artisan route:list`
+
+3. **Authentication Issues**:
+   - Verify token is included in requests
+   - Check token format: `Authorization: Bearer your-token-here`
+   - Ensure token hasn't expired
+
+### Logs
+- **Laravel Logs**: `src/storage/logs/laravel.log`
+- **Nginx Logs**: `docker logs ldb-nginx`
+- **PHP Logs**: `docker logs ldb-php`
+
+## 📄 License
+
+This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).

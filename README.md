@@ -2,7 +2,47 @@
 [![CircleCI](https://circleci.com/gh/anjotadena/laravel-docker-base/tree/master.svg?style=svg)](https://circleci.com/gh/anjotadena/laravel-docker-base/tree/master) ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 ### 🛠 Development Mode (Watch Mode)
-**Important**: You don't access port 5173 directly. Vite runs internally to compile assets that are served through your Laravel application on port 80.
+**Important**: You don't access port 5173 directly. V
+```
+
+## 📖 API Documentation
+
+### Interactive Documentation
+
+Visit **https://localhost/api/docs** to access the interactive API documentation powered by **Laravel Scramble**. This provides:
+
+- 🔍 **Interactive API Explorer** - Test endpoints directly from the browser
+- 📋 **Comprehensive Endpoint Listing** - All available routes with detailed descriptions
+- 🔑 **Authentication Support** - Built-in Bearer token authentication
+- 📊 **Request/Response Examples** - Real examples for all endpoints
+- 🏷️ **Organized by Tags** - Endpoints grouped by domain (Authentication, Users)
+- 📱 **Mobile Friendly** - Responsive documentation interface
+
+### Documentation Features
+
+- **Auto-Generated**: Documentation is automatically generated from your code annotations
+- **Always Up-to-Date**: Reflects the current state of your API endpoints
+- **Type Safety**: Leverages Laravel's type hints and validation rules
+- **Domain-Driven**: Organized according to your DDD architecture
+
+### OpenAPI 3.0 Specification
+
+The complete OpenAPI 3.0 specification is available at **https://localhost/api/docs.json** for:
+- **Code Generation**: Generate client SDKs in multiple languages
+- **Testing Tools**: Import into Postman, Insomnia, or other API clients
+- **CI/CD Integration**: Automated API testing and validation
+- **Third-Party Integration**: Share with external developers and services
+
+### Authentication in Documentation
+
+The documentation includes built-in authentication support:
+1. **Login** via the `/api/v1/auth/login` endpoint in the docs
+2. **Copy the token** from the response
+3. **Click "Authorize"** button in the top-right
+4. **Paste your token** (without "Bearer " prefix)
+5. **Test protected endpoints** directly in the documentation
+
+## 🚀 Development Workflowruns internally to compile assets that are served through your Laravel application on port 80.
 
 ## 🔗 Laravel + Vite Integration
 
@@ -120,8 +160,10 @@ make start-basic
 ```
 
 Your application will be available at:
-- **Main Application**: http://localhost (Laravel views with compiled assets)
-- **API Documentation**: http://localhost/api/documentation  
+- **Main Application**: https://localhost (Laravel views with compiled assets)
+- **API Documentation**: https://localhost/api/docs (Scramble/OpenAPI)
+- **API JSON Schema**: https://localhost/api/docs.json (OpenAPI 3.0 specification)
+- **Legacy API Docs**: http://localhost/api/documentation (Swagger/L5-Swagger)
 - **Database Admin**: http://localhost:8080 (Adminer)
 
 **Note**: Port 5173 is used internally by Vite for asset compilation and HMR. Your main application runs on port 80 through Laravel.
@@ -240,6 +282,19 @@ laravel-docker-base/
 │   └── npm/               # Node.js configuration
 ├── src/                   # Laravel application
 │   ├── app/               # Laravel app code
+│   │   ├── Domains/       # 🏗️ Domain-Driven Design structure
+│   │   │   ├── Auth/      # Authentication domain
+│   │   │   │   ├── Controllers/
+│   │   │   │   ├── Services/
+│   │   │   │   ├── DTOs/
+│   │   │   │   └── Requests/
+│   │   │   └── User/      # User management domain
+│   │   │       ├── Controllers/
+│   │   │       └── Services/
+│   │   ├── Shared/        # Shared components across domains
+│   │   │   ├── Http/      # HTTP responses, middleware
+│   │   │   └── Exceptions/# Custom exceptions
+│   │   └── Models/        # Eloquent models
 │   ├── resources/         # Views, assets, lang
 │   │   ├── ts/           # TypeScript/React code
 │   │   └── css/          # Stylesheets
@@ -253,7 +308,90 @@ laravel-docker-base/
 └── README.md
 ```
 
-## 🚀 Development Workflow
+## � API Endpoints
+
+Our API follows Domain-Driven Design (DDD) architecture with Laravel Sanctum authentication.
+
+### Authentication Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/api/v1/auth/register` | Register new user | No |
+| POST | `/api/v1/auth/login` | Login user | No |
+| POST | `/api/v1/auth/logout` | Logout user | Yes |
+| GET | `/api/v1/auth/me` | Get current user | Yes |
+| POST | `/api/v1/auth/refresh` | Refresh token | Yes |
+
+### User Management Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/api/v1/users` | Get all users | Yes |
+| GET | `/api/v1/users/search?q={query}` | Search users | Yes |
+| GET | `/api/v1/users/{id}` | Get user by ID | Yes |
+| PUT | `/api/v1/users/{id}` | Update user | Yes |
+| DELETE | `/api/v1/users/{id}` | Delete user | Yes |
+
+### API Usage Examples
+
+#### Register a new user
+```bash
+curl -X POST https://localhost/api/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "name": "John Doe",
+    "email": "john@example.com",
+    "password": "password123",
+    "password_confirmation": "password123"
+  }'
+```
+
+#### Login
+```bash
+curl -X POST https://localhost/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "email": "john@example.com",
+    "password": "password123"
+  }'
+```
+
+#### Access protected endpoints
+```bash
+curl -X GET https://localhost/api/v1/auth/me \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
+  -H "Accept: application/json"
+```
+
+### API Response Format
+
+All API responses follow a consistent format:
+
+**Success Response:**
+```json
+{
+  "success": true,
+  "message": "Operation successful",
+  "data": {
+    // Response data here
+  }
+}
+```
+
+**Error Response:**
+```json
+{
+  "success": false,
+  "message": "Error message",
+  "errors": {
+    // Validation errors or additional error details
+  }
+}
+```
+
+## �🚀 Development Workflow
 
 ### 1. Initial Setup
 ```bash

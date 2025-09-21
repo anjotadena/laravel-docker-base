@@ -1,0 +1,103 @@
+###
+### Laravel DDD API Testing
+###
+### Instructions:
+### 1. First run the "Register" request to create a user
+### 2. Run the "Login" request and copy the token from the response
+### 3. Replace all {{auth_token}} with your actual token, or set up environment variables
+### 4. Make sure to use HTTPS (https://localhost) and ignore SSL warnings
+###
+### To set up environment variables in VS Code REST Client:
+### Create a file named "http-client.env.json" in the root directory with:
+### {
+###   "dev": {
+###     "auth_token": "your_token_here"
+###   }
+### }
+###### Register
+POST https://localhost/api/v1/auth/register
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "password123",
+  "password_confirmation": "password123"
+}
+
+### Login (Copy token from response)
+POST https://localhost/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "john@example.com",
+  "password": "password123"
+}
+
+### Get Current User (me)
+GET https://localhost/api/v1/auth/me
+Authorization: Bearer 19|Z3rN7p6EsaF7HhqwcODyTvnNqbIKGG1Dny4D09kT909e5628
+Accept: application/json
+
+### Logout
+POST https://localhost/api/v1/auth/logout
+Authorization: Bearer {{auth_token}}
+Accept: application/json
+
+### Refresh Token
+POST https://localhost/api/v1/auth/refresh
+Authorization: Bearer {{auth_token}}
+Accept: application/json
+
+### List Users
+GET https://localhost/api/v1/users
+Authorization: Bearer {{auth_token}}
+Accept: application/json
+
+### Search Users
+GET https://localhost/api/v1/users/search?q=john
+Authorization: Bearer {{auth_token}}
+Accept: application/json
+
+### Get User by ID
+GET https://localhost/api/v1/users/3
+Authorization: Bearer {{auth_token}}
+Accept: application/json
+
+### Update User
+PUT https://localhost/api/v1/users/3
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "John Updated"
+}
+
+### Delete User
+DELETE https://localhost/api/v1/users/3
+Authorization: Bearer {{auth_token}}
+Accept: application/json
+
+###
+### Alternative: Manual Token Usage
+### If automatic token capture doesn't work, copy the token from login response
+### and replace YOUR_TOKEN_HERE with the actual token
+###
+
+### Manual Login (copy token from response)
+POST https://localhost/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "john@example.com",
+  "password": "password123"
+}
+
+### Manual - Get Current User
+GET https://localhost/api/v1/auth/me
+Authorization: Bearer YOUR_TOKEN_HERE
+Accept: application/json

@@ -1,10 +1,7 @@
 <?php
 
-use App\Http\Controllers\API\v1\Auth\LoginController;
-use App\Http\Controllers\API\v1\Auth\LogoutController;
-use App\Http\Controllers\API\v1\Auth\RegisterController;
-use App\Http\Controllers\API\v1\Auth\VerifyCodeController;
-use Illuminate\Http\Request;
+use App\Domains\Auth\Controllers\AuthController;
+use App\Domains\User\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,22 +15,26 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::namespace("Auth")->group(function () {
-    Route::post('/login', LoginController::class)->name('auth.login');
-    Route::post('/register', RegisterController::class)->name('auth.register');
-    Route::post('/verify', VerifyCodeController::class)->name('auth.verify');
-    
+// Auth Routes (Public)
+Route::prefix('auth')->group(function () {
+    Route::post('/register', [AuthController::class, 'register'])->name('auth.register');
+    Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
 
-    Route::middleware('auth:sanctum')
-        ->group(function () {
-            Route::post('/logout', LogoutController::class)->name('auth.logout');      
-        });
-
-    // protected by is admin middelware
-    Route::group(['middleware' => 'is_admin'], function () {
+    // Protected Auth Routes
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
+        Route::get('/me', [AuthController::class, 'me'])->name('auth.me');
+        Route::post('/refresh', [AuthController::class, 'refresh'])->name('auth.refresh');
     });
 });
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// User Routes (Protected)
+Route::middleware('auth:sanctum')->group(function () {
+    Route::prefix('users')->group(function () {
+        Route::get('/', [UserController::class, 'index'])->name('users.index');
+        Route::get('/search', [UserController::class, 'search'])->name('users.search');
+        Route::get('/{id}', [UserController::class, 'show'])->name('users.show');
+        Route::put('/{id}', [UserController::class, 'update'])->name('users.update');
+        Route::delete('/{id}', [UserController::class, 'destroy'])->name('users.destroy');
+    });
 });
