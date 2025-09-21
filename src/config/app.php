@@ -13,7 +13,7 @@ return [
     | or any other location as required by the application or its packages.
     */
     'version' => env('APP_VERSION', '1.0.0'),
-    
+
     /*
     |--------------------------------------------------------------------------
     | Application Name
@@ -187,6 +187,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        App\Providers\ScrambleServiceProvider::class,
 
     ],
 

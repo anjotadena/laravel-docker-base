@@ -20,7 +20,14 @@ class AuthController extends Controller
     ) {}
 
     /**
-     * Register a new user.
+     * Register a new user
+     *
+     * Creates a new user account with the provided credentials and returns
+     * an authentication token for immediate use.
+     *
+     * @tag Authentication
+     * @response 201 {"success": true, "message": "User registered successfully", "data": {"user": {"id": 1, "name": "John Doe", "email": "john@example.com"}, "token": "1|abc123..."}}
+     * @response 422 {"success": false, "message": "Validation failed", "errors": {"email": ["The email has already been taken."]}}
      */
     public function register(RegisterRequest $request): JsonResponse
     {
@@ -44,7 +51,14 @@ class AuthController extends Controller
     }
 
     /**
-     * Login user.
+     * Login user
+     *
+     * Authenticates a user with email and password, returning an access token
+     * for API authentication.
+     *
+     * @tag Authentication
+     * @response 200 {"success": true, "message": "Login successful", "data": {"user": {"id": 1, "name": "John Doe", "email": "john@example.com"}, "token": "2|xyz789..."}}
+     * @response 422 {"success": false, "message": "The provided credentials are incorrect.", "errors": {"email": ["The provided credentials are incorrect."]}}
      */
     public function login(LoginRequest $request): JsonResponse
     {
@@ -67,7 +81,14 @@ class AuthController extends Controller
     }
 
     /**
-     * Logout user.
+     * Logout user
+     *
+     * Revokes the current user's authentication token, effectively logging them out.
+     *
+     * @tag Authentication
+     * @authenticated
+     * @response 200 {"success": true, "message": "Logout successful", "data": null}
+     * @response 401 {"message": "Unauthenticated."}
      */
     public function logout(Request $request): JsonResponse
     {
@@ -83,7 +104,14 @@ class AuthController extends Controller
     }
 
     /**
-     * Get authenticated user.
+     * Get current user
+     *
+     * Returns the authenticated user's profile information.
+     *
+     * @tag Authentication
+     * @authenticated
+     * @response 200 {"success": true, "message": "User retrieved successfully", "data": {"user": {"id": 1, "name": "John Doe", "email": "john@example.com", "created_at": "2025-09-20T16:52:40.000000Z"}}}
+     * @response 401 {"message": "Unauthenticated."}
      */
     public function me(Request $request): JsonResponse
     {
@@ -100,7 +128,14 @@ class AuthController extends Controller
     }
 
     /**
-     * Refresh user token.
+     * Refresh authentication token
+     *
+     * Revokes the current token and generates a new one for continued API access.
+     *
+     * @tag Authentication
+     * @authenticated
+     * @response 200 {"success": true, "message": "Token refreshed successfully", "data": {"user": {"id": 1, "name": "John Doe", "email": "john@example.com"}, "token": "3|new_token..."}}
+     * @response 401 {"message": "Unauthenticated."}
      */
     public function refresh(Request $request): JsonResponse
     {

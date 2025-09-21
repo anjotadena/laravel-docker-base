@@ -2,7 +2,47 @@
 [![CircleCI](https://circleci.com/gh/anjotadena/laravel-docker-base/tree/master.svg?style=svg)](https://circleci.com/gh/anjotadena/laravel-docker-base/tree/master) ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 ### 🛠 Development Mode (Watch Mode)
-**Important**: You don't access port 5173 directly. Vite runs internally to compile assets that are served through your Laravel application on port 80.
+**Important**: You don't access port 5173 directly. V
+```
+
+## 📖 API Documentation
+
+### Interactive Documentation
+
+Visit **https://localhost/api/docs** to access the interactive API documentation powered by **Laravel Scramble**. This provides:
+
+- 🔍 **Interactive API Explorer** - Test endpoints directly from the browser
+- 📋 **Comprehensive Endpoint Listing** - All available routes with detailed descriptions
+- 🔑 **Authentication Support** - Built-in Bearer token authentication
+- 📊 **Request/Response Examples** - Real examples for all endpoints
+- 🏷️ **Organized by Tags** - Endpoints grouped by domain (Authentication, Users)
+- 📱 **Mobile Friendly** - Responsive documentation interface
+
+### Documentation Features
+
+- **Auto-Generated**: Documentation is automatically generated from your code annotations
+- **Always Up-to-Date**: Reflects the current state of your API endpoints
+- **Type Safety**: Leverages Laravel's type hints and validation rules
+- **Domain-Driven**: Organized according to your DDD architecture
+
+### OpenAPI 3.0 Specification
+
+The complete OpenAPI 3.0 specification is available at **https://localhost/api/docs.json** for:
+- **Code Generation**: Generate client SDKs in multiple languages
+- **Testing Tools**: Import into Postman, Insomnia, or other API clients
+- **CI/CD Integration**: Automated API testing and validation
+- **Third-Party Integration**: Share with external developers and services
+
+### Authentication in Documentation
+
+The documentation includes built-in authentication support:
+1. **Login** via the `/api/v1/auth/login` endpoint in the docs
+2. **Copy the token** from the response
+3. **Click "Authorize"** button in the top-right
+4. **Paste your token** (without "Bearer " prefix)
+5. **Test protected endpoints** directly in the documentation
+
+## 🚀 Development Workflowruns internally to compile assets that are served through your Laravel application on port 80.
 
 ## 🔗 Laravel + Vite Integration
 
@@ -120,8 +160,10 @@ make start-basic
 ```
 
 Your application will be available at:
-- **Main Application**: http://localhost (Laravel views with compiled assets)
-- **API Documentation**: http://localhost/api/documentation  
+- **Main Application**: https://localhost (Laravel views with compiled assets)
+- **API Documentation**: https://localhost/api/docs (Scramble/OpenAPI)
+- **API JSON Schema**: https://localhost/api/docs.json (OpenAPI 3.0 specification)
+- **Legacy API Docs**: http://localhost/api/documentation (Swagger/L5-Swagger)
 - **Database Admin**: http://localhost:8080 (Adminer)
 
 **Note**: Port 5173 is used internally by Vite for asset compilation and HMR. Your main application runs on port 80 through Laravel.

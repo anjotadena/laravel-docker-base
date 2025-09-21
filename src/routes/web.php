@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\Web\HomeController;
+use Dedoc\Scramble\Scramble;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,6 +17,15 @@ use App\Http\Controllers\Web\HomeController;
 |
 */
 
+// API Documentation Route
+Route::get('/api/docs', function () {
+    return redirect('/docs/api');
+});
+
+Route::get('/api/docs/{path?}', function ($path = null) {
+    return redirect('/docs/api' . ($path ? '/' . $path : ''));
+})->where('path', '.*');
+
 Route::get('/{any}', function () {
     return view('index');
-})->where('any', '.*');
+})->where('any', '^(?!api|docs).*$');
