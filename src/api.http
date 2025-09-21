@@ -1,0 +1,66 @@
+### Register
+POST https://localhost/api/v1/auth/register
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "password123",
+  "password_confirmation": "password123"
+}
+
+### Login
+POST https://localhost/api/v1/auth/login
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "john@example.com",
+  "password": "password123"
+}
+
+### Get Current User (me)
+GET https://localhost/api/v1/auth/me
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Logout
+POST https://localhost/api/v1/auth/logout
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Refresh Token
+POST https://localhost/api/v1/auth/refresh
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### List Users
+GET https://localhost/api/v1/users
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Search Users
+GET https://localhost/api/v1/users/search?q=john
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Get User by ID
+GET https://localhost/api/v1/users/3
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Update User
+PUT https://localhost/api/v1/users/3
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "John Updated"
+}
+
+### Delete User
+DELETE https://localhost/api/v1/users/3
+Authorization: Bearer {{token}}
+Accept: application/json
