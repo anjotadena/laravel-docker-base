@@ -2,20 +2,26 @@
 
 namespace App\Domains\User\Services;
 
+use App\Domains\User\Contracts\UserRepositoryInterface;
+use App\Domains\User\Events\UserUpdated;
 use App\Domains\User\Exceptions\UserNotFoundException;
 use App\Domains\User\Exceptions\EmailAlreadyTakenException;
-use App\Models\User;
+use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class UserService
 {
+    public function __construct(
+        private readonly UserRepositoryInterface $userRepository
+    ) {}
+
     /**
      * Get all users.
      */
     public function getAllUsers(): Collection
     {
-        return User::all();
+        return $this->userRepository->getAll();
     }
 
     /**
@@ -23,7 +29,7 @@ class UserService
      */
     public function getUserById(int $id): User
     {
-        $user = User::find($id);
+        $user = $this->userRepository->findById($id);
 
         if (!$user) {
             throw new UserNotFoundException("User with ID {$id} not found");
@@ -37,7 +43,7 @@ class UserService
      */
     public function getUserByEmail(string $email): User
     {
-        $user = User::where('email', $email)->first();
+        $user = $this->userRepository->findByEmail($email);
 
         if (!$user) {
             throw new UserNotFoundException("User with email {$email} not found");
@@ -55,14 +61,17 @@ class UserService
 
         // Check if email is being updated and already exists
         if (isset($data['email']) && $data['email'] !== $user->email) {
-            if (User::where('email', $data['email'])->exists()) {
+            if ($this->userRepository->emailExists($data['email'])) {
                 throw new EmailAlreadyTakenException($data['email']);
             }
         }
 
-        $user->update($data);
+        $updatedUser = $this->userRepository->update($user, $data);
 
-        return $user->fresh();
+        // Fire user updated event
+        event(new UserUpdated($updatedUser, $data));
+
+        return $updatedUser;
     }
 
     /**
@@ -72,7 +81,7 @@ class UserService
     {
         $user = $this->getUserById($id);
 
-        return $user->delete();
+        return $this->userRepository->delete($user);
     }
 
     /**
@@ -80,8 +89,6 @@ class UserService
      */
     public function searchUsers(string $query): Collection
     {
-        return User::where('name', 'LIKE', "%{$query}%")
-            ->orWhere('email', 'LIKE', "%{$query}%")
-            ->get();
+        return $this->userRepository->search($query);
     }
 }

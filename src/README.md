@@ -1,15 +1,17 @@
-# Laravel DDD API
+# Laravel DDD API Documentation
 
-A comprehensive REST API built with **Domain-Driven Design (DDD)** architecture using Laravel, featuring:
+A comprehensive REST API built with Domain-Driven Design (DDD) architecture using Laravel, featuring Laravel Sanctum authentication and interactive API documentation.
 
-- 🏗️ **Domain-Driven Design** architecture with clean separation of concerns
-- 🔐 **Laravel Sanctum** authentication with bearer token support
-- 📚 **Interactive API Documentation** powered by Laravel Scramble
-- 🧪 **HTTP Client Testing** files for easy endpoint testing
-- 🐳 **Docker** development environment ready
-- ✨ **Modern Laravel** with best practices
+## Features
 
-## 🚀 Quick Start
+- **Domain-Driven Design** architecture with clean separation of concerns
+- **Laravel Sanctum** authentication with bearer token support
+- **Interactive API Documentation** powered by Laravel Scramble
+- **HTTP Client Testing** files for easy endpoint testing
+- **Docker** development environment ready
+- **Modern Laravel** with best practices
+
+## Quick Start
 
 1. **Start the Docker environment**:
    ```bash
@@ -21,12 +23,13 @@ A comprehensive REST API built with **Domain-Driven Design (DDD)** architecture 
    - OpenAPI JSON Spec: [https://localhost/docs/api.json](https://localhost/docs/api.json)
 
 3. **Test the API**:
-   - Use the provided `src/api.http` file with your HTTP client
+   - Use the provided `api.http` file with your HTTP client
    - Try the interactive documentation's "Try It" feature
 
-## 📖 API Documentation
+## API Documentation
 
 ### Interactive Documentation
+
 Visit [https://localhost/api/docs](https://localhost/api/docs) to access the comprehensive interactive API documentation powered by Laravel Scramble. The documentation includes:
 
 - **Complete endpoint reference** with request/response examples
@@ -40,16 +43,19 @@ Visit [https://localhost/api/docs](https://localhost/api/docs) to access the com
 - `POST /api/v1/auth/register` - User registration
 - `POST /api/v1/auth/login` - User login
 - `POST /api/v1/auth/logout` - User logout (requires authentication)
+- `GET /api/v1/auth/me` - Get current user (requires authentication)
+- `POST /api/v1/auth/refresh` - Refresh token (requires authentication)
 
 #### User Management
 - `GET /api/v1/users` - List all users (requires authentication)
 - `GET /api/v1/users/{id}` - Get specific user (requires authentication)
 - `PUT /api/v1/users/{id}` - Update user (requires authentication)
 - `DELETE /api/v1/users/{id}` - Delete user (requires authentication)
+- `GET /api/v1/users/search` - Search users (requires authentication)
 
-## 🧪 Testing with HTTP Files
+## Testing with HTTP Files
 
-The project includes a comprehensive HTTP testing file at `src/api.http` with:
+The project includes a comprehensive HTTP testing file at `api.http` with:
 
 - Pre-configured environment variables
 - Complete endpoint coverage
@@ -60,7 +66,7 @@ The project includes a comprehensive HTTP testing file at `src/api.http` with:
 
 1. **Using REST Client extension in VS Code**:
    - Install the "REST Client" extension
-   - Open `src/api.http`
+   - Open `api.http`
    - Configure environment in `http-client.env.json`
 
 2. **Environment Configuration**:
@@ -73,7 +79,7 @@ The project includes a comprehensive HTTP testing file at `src/api.http` with:
    }
    ```
 
-## 🔐 Authentication
+## Authentication
 
 The API uses **Laravel Sanctum** for authentication:
 
@@ -84,29 +90,45 @@ The API uses **Laravel Sanctum** for authentication:
    ```
 3. **Token management** is handled automatically in the HTTP testing files
 
-## 🏗️ Architecture
+## Architecture
 
 This project follows **Domain-Driven Design (DDD)** principles:
 
 ```
-src/app/
+app/
 ├── Domains/           # Business domains
 │   ├── Auth/         # Authentication domain
+│   │   ├── Controllers/
+│   │   ├── Services/
+│   │   ├── DTOs/
+│   │   ├── Events/
+│   │   └── Exceptions/
 │   └── User/         # User management domain
-├── Http/             # HTTP layer (controllers, requests, resources)
-├── Providers/        # Service providers
-└── Shared/           # Shared utilities and contracts
+│       ├── Controllers/
+│       ├── Services/
+│       ├── Repositories/
+│       ├── ValueObjects/
+│       ├── Events/
+│       └── Listeners/
+├── Shared/           # Shared components
+│   ├── Http/         # HTTP responses, middleware
+│   └── Exceptions/   # Custom exceptions
+└── Providers/        # Service providers
 ```
 
 ### Domain Structure
+
 Each domain contains:
-- **Models** - Eloquent models and business entities
+- **Controllers** - HTTP request handlers
 - **Services** - Business logic and use cases
 - **Repositories** - Data access patterns
-- **Events** - Domain events
-- **Policies** - Authorization logic
+- **DTOs** - Data transfer objects with validation
+- **Value Objects** - Domain concepts with business rules
+- **Events** - Domain events for decoupled side effects
+- **Listeners** - Event handlers for business operations
+- **Exceptions** - Domain-specific exceptions
 
-## 🛠️ Development
+## Development
 
 ### Requirements
 - Docker & Docker Compose
@@ -114,6 +136,7 @@ Each domain contains:
 - Composer (for dependency management)
 
 ### Local Setup
+
 1. **Clone the repository**
 2. **Copy environment file**:
    ```bash
@@ -143,7 +166,7 @@ Each domain contains:
 - **Database Admin (Adminer)**: [http://localhost:8080](http://localhost:8080)
 - **Redis**: `localhost:6379`
 
-## 🧪 Testing
+## Testing
 
 ### Running Tests
 ```bash
@@ -163,18 +186,18 @@ Use the provided `src/api.http` file with:
 - **JetBrains HTTP Client**
 - **Postman** (import the collection)
 
-## 📊 API Features
+## API Features
 
-- ✅ **RESTful Design** - Follows REST principles
-- ✅ **OpenAPI 3.1** - Complete specification generation  
-- ✅ **Interactive Docs** - Try endpoints in the browser
-- ✅ **Bearer Token Auth** - Secure authentication via Sanctum
-- ✅ **Request/Response Validation** - Comprehensive validation
-- ✅ **Error Handling** - Consistent error responses
-- ✅ **Rate Limiting** - Built-in API rate limiting
-- ✅ **CORS Support** - Cross-origin resource sharing
+- **RESTful Design** - Follows REST principles
+- **OpenAPI 3.1** - Complete specification generation  
+- **Interactive Docs** - Try endpoints in the browser
+- **Bearer Token Auth** - Secure authentication via Sanctum
+- **Request/Response Validation** - Comprehensive validation
+- **Error Handling** - Consistent error responses
+- **Rate Limiting** - Built-in API rate limiting
+- **CORS Support** - Cross-origin resource sharing
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -193,10 +216,10 @@ Use the provided `src/api.http` file with:
    - Ensure token hasn't expired
 
 ### Logs
-- **Laravel Logs**: `src/storage/logs/laravel.log`
+- **Laravel Logs**: `storage/logs/laravel.log`
 - **Nginx Logs**: `docker logs ldb-nginx`
 - **PHP Logs**: `docker logs ldb-php`
 
-## 📄 License
+## License
 
 This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).

@@ -7,9 +7,12 @@ use App\Domains\Auth\DTOs\RegisterDto;
 use App\Domains\Auth\Exceptions\InvalidCredentialsException;
 use App\Domains\Auth\Exceptions\EmailNotVerifiedException;
 use App\Domains\Auth\Exceptions\TokenExpiredException;
+use App\Domains\User\Contracts\UserRepositoryInterface;
+use App\Domains\User\Events\UserLoggedIn;
+use App\Domains\User\Events\UserRegistered;
 use App\Domains\User\Exceptions\EmailAlreadyTakenException;
 use App\Domains\User\Exceptions\UserNotFoundException;
-use App\Models\User;
+use App\Domains\User\Models\User;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
@@ -18,23 +21,30 @@ use Illuminate\Validation\ValidationException;
 
 class AuthService
 {
+    public function __construct(
+        private readonly UserRepositoryInterface $userRepository
+    ) {}
+
     /**
      * Register a new user.
      */
     public function register(RegisterDto $dto): array
     {
         // Check if email already exists
-        if (User::where('email', $dto->email)->exists()) {
-            throw new EmailAlreadyTakenException($dto->email);
+        if ($this->userRepository->emailExists($dto->email->value())) {
+            throw new EmailAlreadyTakenException($dto->email->value());
         }
 
-        $user = User::create([
-            'name' => $dto->name,
-            'email' => $dto->email,
-            'password' => $dto->password, // User model will automatically hash this
+        $user = $this->userRepository->create([
+            'name' => $dto->name->value(),
+            'email' => $dto->email->value(),
+            'password' => $dto->password->value(), // User model will automatically hash this
         ]);
 
         $token = $user->createToken('auth-token')->plainTextToken;
+
+        // Fire user registered event
+        event(new UserRegistered($user));
 
         return [
             'user' => $user,
@@ -48,13 +58,13 @@ class AuthService
     public function login(LoginDto $dto): array
     {
         // Check if user exists first
-        $user = User::where('email', $dto->email)->first();
+        $user = $this->userRepository->findByEmail($dto->email->value());
         if (!$user) {
             throw new InvalidCredentialsException();
         }
 
         // Check if password is correct
-        if (!Hash::check($dto->password, $user->password)) {
+        if (!Hash::check($dto->password->value(), $user->password)) {
             throw new InvalidCredentialsException();
         }
 
@@ -65,6 +75,9 @@ class AuthService
 
         // Create token
         $token = $user->createToken('auth-token')->plainTextToken;
+
+        // Fire user logged in event
+        event(new UserLoggedIn($user));
 
         return [
             'user' => $user,
