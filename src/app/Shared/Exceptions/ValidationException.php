@@ -4,19 +4,38 @@ namespace App\Shared\Exceptions;
 
 class ValidationException extends DomainException
 {
-    private array $errors;
+    protected array $errors;
 
     public function __construct(
         array $errors,
-        string $message = 'Validation failed',
-        string $errorCode = 'VALIDATION_ERROR'
+        string $message = 'The given data is invalid.',
+        array $context = []
     ) {
-        parent::__construct($message, $errorCode, ['errors' => $errors]);
         $this->errors = $errors;
+
+        parent::__construct(
+            message: $message,
+            errorCode: 'VALIDATION_FAILED',
+            context: array_merge(['errors' => $errors], $context),
+            httpStatusCode: 422,
+            shouldReport: false
+        );
     }
 
     public function getErrors(): array
     {
         return $this->errors;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'error' => [
+                'code' => $this->getErrorCode(),
+                'message' => $this->getMessage(),
+                'errors' => $this->getErrors(),
+                'context' => $this->getContext(),
+            ]
+        ];
     }
 }

@@ -31,23 +31,17 @@ class AuthController extends Controller
      */
     public function register(RegisterRequest $request): JsonResponse
     {
-        try {
-            $dto = RegisterDto::fromArray($request->validated());
-            $result = $this->authService->register($dto);
+        $dto = RegisterDto::fromArray($request->validated());
+        $result = $this->authService->register($dto);
 
-            return ApiResponse::success(
-                data: [
-                    'user' => $result['user'],
-                    'token' => $result['token'],
-                ],
-                message: 'User registered successfully',
-                statusCode: 201
-            );
-        } catch (ValidationException $e) {
-            return ApiResponse::validationError($e->errors(), $e->getMessage());
-        } catch (\Exception $e) {
-            return ApiResponse::serverError('Registration failed: ' . $e->getMessage());
-        }
+        return ApiResponse::success(
+            data: [
+                'user' => $result['user'],
+                'token' => $result['token'],
+            ],
+            message: 'User registered successfully',
+            statusCode: 201
+        );
     }
 
     /**
@@ -62,22 +56,16 @@ class AuthController extends Controller
      */
     public function login(LoginRequest $request): JsonResponse
     {
-        try {
-            $dto = LoginDto::fromArray($request->validated());
-            $result = $this->authService->login($dto);
+        $dto = LoginDto::fromArray($request->validated());
+        $result = $this->authService->login($dto);
 
-            return ApiResponse::success(
-                data: [
-                    'user' => $result['user'],
-                    'token' => $result['token'],
-                ],
-                message: 'Login successful'
-            );
-        } catch (ValidationException $e) {
-            return ApiResponse::validationError($e->errors(), $e->getMessage());
-        } catch (\Exception $e) {
-            return ApiResponse::serverError('Login failed: ' . $e->getMessage());
-        }
+        return ApiResponse::success(
+            data: [
+                'user' => $result['user'],
+                'token' => $result['token'],
+            ],
+            message: 'Login successful'
+        );
     }
 
     /**

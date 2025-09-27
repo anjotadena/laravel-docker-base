@@ -4,6 +4,11 @@ namespace App\Domains\Auth\Services;
 
 use App\Domains\Auth\DTOs\LoginDto;
 use App\Domains\Auth\DTOs\RegisterDto;
+use App\Domains\Auth\Exceptions\InvalidCredentialsException;
+use App\Domains\Auth\Exceptions\EmailNotVerifiedException;
+use App\Domains\Auth\Exceptions\TokenExpiredException;
+use App\Domains\User\Exceptions\EmailAlreadyTakenException;
+use App\Domains\User\Exceptions\UserNotFoundException;
 use App\Models\User;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -18,6 +23,11 @@ class AuthService
      */
     public function register(RegisterDto $dto): array
     {
+        // Check if email already exists
+        if (User::where('email', $dto->email)->exists()) {
+            throw new EmailAlreadyTakenException($dto->email);
+        }
+
         $user = User::create([
             'name' => $dto->name,
             'email' => $dto->email,
@@ -37,13 +47,23 @@ class AuthService
      */
     public function login(LoginDto $dto): array
     {
-        if (!Auth::attempt(['email' => $dto->email, 'password' => $dto->password], $dto->remember)) {
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
-            ]);
+        // Check if user exists first
+        $user = User::where('email', $dto->email)->first();
+        if (!$user) {
+            throw new InvalidCredentialsException();
         }
 
-        $user = Auth::user();
+        // Check if password is correct
+        if (!Hash::check($dto->password, $user->password)) {
+            throw new InvalidCredentialsException();
+        }
+
+        // Check if email is verified (if your app requires it)
+        if ($user->email_verified_at === null) {
+            throw new EmailNotVerifiedException($user->email);
+        }
+
+        // Create token
         $token = $user->createToken('auth-token')->plainTextToken;
 
         return [
@@ -60,7 +80,7 @@ class AuthService
         $user = Auth::user();
 
         if (!$user) {
-            throw new AuthenticationException('User not authenticated');
+            throw new UserNotFoundException('User not authenticated');
         }
 
         // Revoke all tokens for the user
@@ -75,7 +95,7 @@ class AuthService
         $user = Auth::user();
 
         if (!$user) {
-            throw new AuthenticationException('User not authenticated');
+            throw new UserNotFoundException('User not authenticated');
         }
 
         return $user;
