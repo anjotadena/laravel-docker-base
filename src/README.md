@@ -162,7 +162,7 @@ Each domain contains:
 ### Available Services
 - **Web Application**: [https://localhost](https://localhost)
 - **API Documentation**: [https://localhost/api/docs](https://localhost/api/docs)
-- **Database (MySQL)**: `localhost:3306`
+- **Database (MySQL)**: `localhost:4306`
 - **Database Admin (Adminer)**: [http://localhost:8080](http://localhost:8080)
 - **Redis**: `localhost:6379`
 
@@ -181,7 +181,7 @@ docker exec -it ldb-php php artisan test --coverage
 ```
 
 ### HTTP Client Testing
-Use the provided `api.http` file with:
+Use the provided `src/api.http` file with:
 - **VS Code REST Client** extension
 - **JetBrains HTTP Client**
 - **Postman** (import the collection)
