@@ -6,7 +6,7 @@ use App\Domains\User\Contracts\UserRepositoryInterface;
 use App\Domains\User\Events\UserUpdated;
 use App\Domains\User\Exceptions\UserNotFoundException;
 use App\Domains\User\Exceptions\EmailAlreadyTakenException;
-use App\Models\User;
+use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 

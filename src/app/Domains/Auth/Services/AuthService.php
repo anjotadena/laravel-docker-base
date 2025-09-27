@@ -12,7 +12,7 @@ use App\Domains\User\Events\UserLoggedIn;
 use App\Domains\User\Events\UserRegistered;
 use App\Domains\User\Exceptions\EmailAlreadyTakenException;
 use App\Domains\User\Exceptions\UserNotFoundException;
-use App\Models\User;
+use App\Domains\User\Models\User;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;

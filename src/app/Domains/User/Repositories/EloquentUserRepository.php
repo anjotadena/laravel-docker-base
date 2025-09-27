@@ -3,7 +3,7 @@
 namespace App\Domains\User\Repositories;
 
 use App\Domains\User\Contracts\UserRepositoryInterface;
-use App\Models\User;
+use App\Domains\User\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 
 class EloquentUserRepository implements UserRepositoryInterface
