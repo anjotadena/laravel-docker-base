@@ -6,8 +6,15 @@ class AuthenticationException extends DomainException
 {
     public function __construct(
         string $message = 'Authentication failed',
-        string $errorCode = 'AUTH_ERROR'
+        string $reason = '',
+        array $context = []
     ) {
-        parent::__construct($message, $errorCode, [], 401);
+        parent::__construct(
+            message: $message,
+            errorCode: 'AUTHENTICATION_FAILED',
+            context: array_merge(['reason' => $reason], $context),
+            httpStatusCode: 401,
+            shouldReport: false
+        );
     }
 }
