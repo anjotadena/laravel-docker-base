@@ -2,6 +2,11 @@
 
 namespace App\Providers;
 
+use App\Domains\User\Events\UserLoggedIn;
+use App\Domains\User\Events\UserRegistered;
+use App\Domains\User\Events\UserUpdated;
+use App\Domains\User\Listeners\LogUserRegistration;
+use App\Domains\User\Listeners\UpdateLastLoginTime;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -17,6 +22,15 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
+        ],
+        
+        // Domain Events
+        UserRegistered::class => [
+            LogUserRegistration::class,
+        ],
+        
+        UserLoggedIn::class => [
+            UpdateLastLoginTime::class,
         ],
     ];
 
