@@ -6,8 +6,10 @@ use InvalidArgumentException;
 
 class Name
 {
+    private readonly string $value;
+
     public function __construct(
-        private readonly string $value
+        string $value
     ) {
         $trimmed = trim($value);
         
@@ -22,6 +24,8 @@ class Name
         if (strlen($trimmed) > 255) {
             throw new InvalidArgumentException('Name cannot exceed 255 characters');
         }
+        
+        $this->value = $trimmed;
     }
 
     public function value(): string
