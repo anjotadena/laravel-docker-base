@@ -108,7 +108,7 @@ class AuthService
     {
         $user = $this->getAuthenticatedUser();
 
-        /** @var \Laravel\\PersonalAccessToken $currentToken */
+        /** @var \Laravel\Sanctum\PersonalAccessToken $currentToken */
         $currentToken = $user->currentAccessToken();
         
         // Revoke current 
