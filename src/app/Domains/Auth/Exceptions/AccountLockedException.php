@@ -12,6 +12,7 @@ class AccountLockedException extends BusinessRuleException
         array $context = []
     ) {
         $message = 'Your account has been temporarily locked.';
+
         if ($unlockAt) {
             $message .= " Please try again after {$unlockAt->format('Y-m-d H:i:s')}.";
         }
