@@ -9,7 +9,7 @@ use App\Domains\Auth\Exceptions\EmailNotVerifiedException;
 use App\Domains\Auth\Exceptions\TokenExpiredException;
 use App\Domains\User\Exceptions\EmailAlreadyTakenException;
 use App\Domains\User\Exceptions\UserNotFoundException;
-use App\Models\User;
+use App\Domains\User\Models\User;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
@@ -108,8 +108,13 @@ class AuthService
     {
         $user = $this->getAuthenticatedUser();
 
-        // Revoke current token
-        $user->currentAccessToken()->delete();
+        /** @var \Laravel\\PersonalAccessToken $currentToken */
+        $currentToken = $user->currentAccessToken();
+        
+        // Revoke current 
+        if ($currentToken) {
+            $currentToken->delete();
+        }
 
         // Create new token
         $token = $user->createToken('auth-token')->plainTextToken;
